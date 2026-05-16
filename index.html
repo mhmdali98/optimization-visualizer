@@ -460,6 +460,12 @@ input[type=range]::-moz-range-thumb {
   grid-template-columns: 2fr 1fr 1fr;
   gap: 7px;
   margin-top: 10px;
+  position: sticky;
+  bottom: 0;
+  background: linear-gradient(to top, rgba(10,14,23,0.98) 80%, transparent);
+  padding-top: 14px;
+  padding-bottom: 4px;
+  z-index: 4;
 }
 button {
   padding: 11px 12px;
@@ -795,12 +801,6 @@ button.primary.playing {
   .btn-row {
     grid-template-columns: 1fr 1fr 1fr;
     gap: 8px;
-    position: sticky;
-    bottom: 0;
-    background: var(--bg);
-    padding-top: 10px;
-    margin-top: 4px;
-    z-index: 5;
   }
 }
 
@@ -964,7 +964,7 @@ button.primary.playing {
           <option value="rastrigin">Rastrigin — كثير القمم</option>
           <option value="himmelblau">Himmelblau — ٤ حلول مثلى</option>
           <option value="ackley">Ackley — قمعي مع تموج</option>
-          <option value="sphere">Sphere — بسيط (تحدّب)</option>
+          <option value="sphere" selected>Sphere — بسيط (تحدّب)</option>
           <option value="eggholder">Egg-Holder — صعب جداً</option>
         </select>
         <div class="fn-meta" id="fnMeta"></div>
@@ -1337,7 +1337,7 @@ const ALGOS = {
 // STATE
 // ═══════════════════════════════════════════════════════════════
 const state = {
-  func: 'rastrigin',
+  func: 'sphere',
   algo: 'all',
   maxIter: 60,
   speed: 120,
