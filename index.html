@@ -228,6 +228,7 @@ body::after {
 .main {
   display: grid;
   grid-template-columns: 290px 1fr 290px;
+  grid-template-rows: 1fr;   /* force the row to fill .main's height */
   gap: 1px;
   background: var(--border-soft);
   overflow: hidden;
@@ -238,6 +239,7 @@ body::after {
   backdrop-filter: blur(8px);
   overflow-y: auto;
   padding: 18px 16px;
+  min-height: 0;   /* prevent grid item from exceeding its cell → enables overflow-y */
 }
 
 .viz {
@@ -246,6 +248,7 @@ body::after {
   grid-template-rows: 1fr 1fr;
   gap: 1px;
   position: relative;
+  min-height: 0;
 }
 .view-wrap {
   position: relative;
