@@ -1,0 +1,1467 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Visualize Optimization — أربع خوارزميات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;800&family=JetBrains+Mono:wght@400;600&family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+<style>
+:root {
+  --bg-deep: #07090f;
+  --bg: #0c1018;
+  --bg-card: #131826;
+  --bg-elev: #1a2030;
+  --border: #232a3d;
+  --border-strong: #2e3651;
+  --text: #e6ebf5;
+  --text-mid: #94a3b8;
+  --text-dim: #64748b;
+  --gold: #fbbf24;
+  --rs: #06d4cd;
+  --hc: #10b981;
+  --sa: #fb923c;
+  --tabu: #c084fc;
+  --rs-dim: #06d4cd33;
+  --hc-dim: #10b98133;
+  --sa-dim: #fb923c33;
+  --tabu-dim: #c084fc33;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  font-family: 'Cairo', 'Outfit', system-ui, sans-serif;
+  background: var(--bg-deep);
+  color: var(--text);
+  overflow: hidden;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Background pattern */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at top right, #1a2342 0%, transparent 50%),
+    radial-gradient(ellipse at bottom left, #1a1a3a 0%, transparent 60%);
+  z-index: -1;
+}
+
+/* === LAYOUT === */
+.app {
+  display: grid;
+  grid-template-rows: 56px 1fr;
+  height: 100vh;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  background: rgba(12,16,24,0.7);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  position: relative;
+  z-index: 10;
+}
+.header h1 {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 300;
+  font-size: 18px;
+  letter-spacing: 0.5px;
+}
+.header h1 span {
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--rs), var(--tabu));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.header .sub {
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-right: 12px;
+}
+
+.main {
+  display: grid;
+  grid-template-columns: 280px 1fr 280px;
+  gap: 1px;
+  background: var(--border);
+  overflow: hidden;
+}
+
+.panel {
+  background: var(--bg);
+  overflow-y: auto;
+  padding: 18px;
+}
+
+.viz {
+  background: var(--bg-deep);
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  gap: 1px;
+  position: relative;
+}
+
+.view-wrap {
+  position: relative;
+  overflow: hidden;
+  background: var(--bg-deep);
+}
+.view-label {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  z-index: 3;
+  background: rgba(0,0,0,0.5);
+  padding: 4px 10px;
+  border-radius: 3px;
+  border: 1px solid var(--border);
+}
+
+#view3d, #view2d {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* === CONTROLS === */
+.section {
+  margin-bottom: 20px;
+}
+.section-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+
+select, input[type=range], button, .pill {
+  font-family: inherit;
+  font-size: 13px;
+}
+
+select {
+  width: 100%;
+  padding: 9px 12px;
+  background: var(--bg-card);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s;
+}
+select:hover { border-color: var(--border-strong); }
+select:focus { border-color: var(--rs); }
+
+.radio-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+.radio-group label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-card);
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.15s;
+  position: relative;
+  user-select: none;
+}
+.radio-group label::before {
+  content: '';
+  position: absolute;
+  top: 0; right: 0;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  margin: 6px;
+  background: currentColor;
+  opacity: 0.5;
+}
+.radio-group label.rs { color: var(--rs); }
+.radio-group label.hc { color: var(--hc); }
+.radio-group label.sa { color: var(--sa); }
+.radio-group label.tabu { color: var(--tabu); }
+.radio-group label.all { color: var(--gold); grid-column: span 2; }
+.radio-group input { display: none; }
+.radio-group input:checked + label {
+  background: var(--bg-elev);
+  border-color: currentColor;
+  box-shadow: 0 0 0 1px currentColor inset, 0 0 12px -2px currentColor;
+}
+.radio-group input:checked + label::before { opacity: 1; }
+
+.field {
+  margin-bottom: 12px;
+}
+.field-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+  font-size: 12px;
+}
+.field-row .name { color: var(--text-mid); }
+.field-row .val {
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text);
+  font-size: 11px;
+  background: var(--bg-card);
+  padding: 2px 8px;
+  border-radius: 3px;
+  border: 1px solid var(--border);
+}
+
+input[type=range] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  background: var(--bg-card);
+  border-radius: 2px;
+  outline: none;
+  border: 1px solid var(--border);
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--text);
+  cursor: pointer;
+  border: 2px solid var(--bg-deep);
+  box-shadow: 0 0 0 1px var(--border-strong);
+}
+input[type=range]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--text);
+  cursor: pointer;
+  border: 2px solid var(--bg-deep);
+}
+
+.btn-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 6px;
+  margin-top: 8px;
+}
+button {
+  padding: 10px 12px;
+  background: var(--bg-card);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+}
+button:hover { background: var(--bg-elev); border-color: var(--border-strong); }
+button:active { transform: scale(0.97); }
+button.primary {
+  background: linear-gradient(135deg, #0d9488, #06b6d4);
+  border: none;
+  color: white;
+  box-shadow: 0 0 16px -4px var(--rs);
+}
+button.primary:hover { filter: brightness(1.1); }
+button.primary.playing {
+  background: linear-gradient(135deg, #b91c1c, #f97316);
+  box-shadow: 0 0 16px -4px var(--sa);
+}
+
+/* === STATS PANEL === */
+.stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 10px;
+  position: relative;
+  overflow: hidden;
+}
+.stat-card.rs::before { background: var(--rs); }
+.stat-card.hc::before { background: var(--hc); }
+.stat-card.sa::before { background: var(--sa); }
+.stat-card.tabu::before { background: var(--tabu); }
+.stat-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  width: 3px;
+  background: var(--text-dim);
+}
+.stat-card .label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  display: flex;
+  justify-content: space-between;
+}
+.stat-card .label .iter {
+  color: var(--text-mid);
+}
+.stat-card .value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 18px;
+  font-weight: 600;
+}
+.stat-card .pos {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+.stat-card .extra {
+  font-size: 11px;
+  color: var(--text-mid);
+  margin-top: 4px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.info-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 12px;
+  color: var(--text-mid);
+  line-height: 1.7;
+}
+.info-box strong { color: var(--text); }
+.info-box .algo-name {
+  display: inline-block;
+  font-weight: 700;
+  margin-left: 4px;
+}
+
+/* === LEGEND === */
+.legend {
+  position: absolute;
+  bottom: 12px;
+  right: 14px;
+  background: rgba(7,9,15,0.85);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  z-index: 3;
+  backdrop-filter: blur(8px);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.legend-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+/* === BADGES === */
+.badge {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.badge.live { background: #16a34a33; color: #4ade80; }
+.badge.idle { background: #71717a33; color: #a1a1aa; }
+.badge.done { background: #2563eb33; color: #60a5fa; }
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border-strong); }
+
+/* Mobile responsive */
+@media (max-width: 1100px) {
+  .main {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr auto;
+    overflow-y: auto;
+  }
+  .panel {
+    max-height: 280px;
+  }
+  .viz {
+    min-height: 60vh;
+  }
+}
+
+/* Function tooltip */
+.tooltip {
+  position: absolute;
+  background: rgba(7,9,15,0.95);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  pointer-events: none;
+  z-index: 5;
+  display: none;
+  white-space: nowrap;
+}
+
+/* Function meta */
+.fn-meta {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+.fn-meta span {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  padding: 2px 6px;
+  background: var(--bg-elev);
+  border-radius: 3px;
+  color: var(--text-dim);
+  border: 1px solid var(--border);
+}
+
+/* Pulse for live indicator */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+.pulse { animation: pulse 1.5s ease-in-out infinite; }
+
+/* Toggle for show-all-rs */
+.toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+.toggle input { display: none; }
+.toggle .sw {
+  width: 28px;
+  height: 16px;
+  background: var(--border);
+  border-radius: 8px;
+  position: relative;
+  transition: 0.2s;
+}
+.toggle .sw::after {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: var(--text);
+  border-radius: 50%;
+  top: 2px;
+  right: 2px;
+  transition: 0.2s;
+}
+.toggle input:checked + .sw { background: var(--rs); }
+.toggle input:checked + .sw::after { right: 14px; background: white; }
+
+.divider {
+  height: 1px;
+  background: var(--border);
+  margin: 14px 0;
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header class="header">
+    <h1><span>Visualize Optimization</span> · أربع خوارزميات</h1>
+    <div class="sub">Random Search · Hill Climbing · Simulated Annealing · Tabu Search</div>
+  </header>
+
+  <div class="main">
+
+    <!-- ============ LEFT: CONTROLS ============ -->
+    <aside class="panel">
+
+      <div class="section">
+        <div class="section-title">تابع الهدف</div>
+        <select id="funcSelect">
+          <option value="rastrigin">Rastrigin — كثير القمم</option>
+          <option value="himmelblau">Himmelblau — ٤ حلول مثلى</option>
+          <option value="ackley">Ackley — قمعي مع تموج</option>
+          <option value="sphere">Sphere — بسيط (تحدّب)</option>
+          <option value="eggholder">Egg-Holder — صعب جداً</option>
+        </select>
+        <div class="fn-meta" id="fnMeta"></div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">الخوارزميات</div>
+        <div class="radio-group">
+          <input type="radio" name="algo" id="a-all" value="all" checked>
+          <label for="a-all" class="all">⚡ All — مقارنة</label>
+
+          <input type="radio" name="algo" id="a-rs" value="rs">
+          <label for="a-rs" class="rs">Random</label>
+
+          <input type="radio" name="algo" id="a-hc" value="hc">
+          <label for="a-hc" class="hc">Hill C.</label>
+
+          <input type="radio" name="algo" id="a-sa" value="sa">
+          <label for="a-sa" class="sa">Sim. Ann.</label>
+
+          <input type="radio" name="algo" id="a-tabu" value="tabu">
+          <label for="a-tabu" class="tabu">Tabu</label>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">المعاملات العامة</div>
+
+        <div class="field">
+          <div class="field-row"><span class="name">عدد التكرارات</span><span class="val" id="vMaxIter">60</span></div>
+          <input type="range" id="maxIter" min="10" max="200" value="60" step="5">
+        </div>
+
+        <div class="field">
+          <div class="field-row"><span class="name">سرعة الأنيميشن</span><span class="val" id="vSpeed">120ms</span></div>
+          <input type="range" id="speed" min="20" max="500" value="120" step="20">
+        </div>
+
+        <div class="field">
+          <div class="field-row"><span class="name">نقطة البداية x₀</span><span class="val" id="vX0">2.5</span></div>
+          <input type="range" id="x0" min="-5" max="5" value="2.5" step="0.1">
+        </div>
+
+        <div class="field">
+          <div class="field-row"><span class="name">نقطة البداية y₀</span><span class="val" id="vY0">-3.0</span></div>
+          <input type="range" id="y0" min="-5" max="5" value="-3.0" step="0.1">
+        </div>
+
+        <div class="field">
+          <div class="field-row"><span class="name">حجم الخطوة (HC/SA/Tabu)</span><span class="val" id="vStep">0.5</span></div>
+          <input type="range" id="step" min="0.1" max="1.5" value="0.5" step="0.05">
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">خاصة بـ SA و Tabu</div>
+
+        <div class="field">
+          <div class="field-row"><span class="name">حرارة ابتدائية T₀ (SA)</span><span class="val" id="vT0">5.0</span></div>
+          <input type="range" id="T0" min="0.5" max="20" value="5.0" step="0.5">
+        </div>
+
+        <div class="field">
+          <div class="field-row"><span class="name">معدل التبريد α (SA)</span><span class="val" id="vCool">0.95</span></div>
+          <input type="range" id="cool" min="0.80" max="0.99" value="0.95" step="0.01">
+        </div>
+
+        <div class="field">
+          <div class="field-row"><span class="name">طول قائمة المحظورات (Tabu)</span><span class="val" id="vTenure">5</span></div>
+          <input type="range" id="tenure" min="1" max="20" value="5" step="1">
+        </div>
+      </div>
+
+      <label class="toggle">
+        <span>إظهار كل عينات RS (شفاف)</span>
+        <input type="checkbox" id="showRSAll" checked>
+        <span class="sw"></span>
+      </label>
+
+      <div class="btn-row">
+        <button id="playBtn" class="primary">▶ تشغيل</button>
+        <button id="stepBtn">⏭ خطوة</button>
+        <button id="resetBtn">↻ إعادة</button>
+      </div>
+    </aside>
+
+    <!-- ============ CENTER: VISUALIZATIONS ============ -->
+    <section class="viz">
+      <div class="view-wrap">
+        <div class="view-label">3D Landscape</div>
+        <div id="view3d"></div>
+        <div class="legend">
+          <div class="legend-row"><span class="legend-dot" style="background:var(--gold);box-shadow:0 0 8px var(--gold)"></span> الحد الأدنى العالمي</div>
+          <div class="legend-row"><span class="legend-dot" style="background:var(--rs)"></span> Random Search</div>
+          <div class="legend-row"><span class="legend-dot" style="background:var(--hc)"></span> Hill Climbing</div>
+          <div class="legend-row"><span class="legend-dot" style="background:var(--sa)"></span> Sim. Annealing</div>
+          <div class="legend-row"><span class="legend-dot" style="background:var(--tabu)"></span> Tabu Search</div>
+        </div>
+      </div>
+      <div class="view-wrap">
+        <div class="view-label">2D Contour Map</div>
+        <canvas id="view2d"></canvas>
+        <div class="tooltip" id="tooltip"></div>
+      </div>
+    </section>
+
+    <!-- ============ RIGHT: STATS ============ -->
+    <aside class="panel">
+      <div class="section">
+        <div class="section-title">النتائج الحالية</div>
+        <div id="stats"></div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">شرح الخوارزمية النشطة</div>
+        <div class="info-box" id="algoInfo">
+          اختر خوارزمية لقراءة شرحها التفاعلي هنا.
+        </div>
+      </div>
+    </aside>
+
+  </div>
+</div>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+// ═══════════════════════════════════════════════════════════════
+// TEST FUNCTIONS
+// ═══════════════════════════════════════════════════════════════
+const FUNCS = {
+  rastrigin: {
+    name: 'Rastrigin',
+    f: (x,y) => 20 + x*x - 10*Math.cos(2*Math.PI*x) + y*y - 10*Math.cos(2*Math.PI*y),
+    bounds: [-5,5,-5,5],
+    global: {x:0, y:0, z:0},
+    scale: 0.08,
+    meta: ['متعدد القمم','أبعاد:2','مدى:5','نقاط محلية كثيرة جداً']
+  },
+  himmelblau: {
+    name: 'Himmelblau',
+    f: (x,y) => Math.pow(x*x+y-11,2) + Math.pow(x+y*y-7,2),
+    bounds: [-5,5,-5,5],
+    global: {x:3, y:2, z:0},
+    scale: 0.012,
+    meta: ['٤ حلول مثلى','أبعاد:2','مدى:5','تتسلق إحدى الأودية']
+  },
+  ackley: {
+    name: 'Ackley',
+    f: (x,y) => -20*Math.exp(-0.2*Math.sqrt(0.5*(x*x+y*y)))
+              - Math.exp(0.5*(Math.cos(2*Math.PI*x)+Math.cos(2*Math.PI*y)))
+              + Math.E + 20,
+    bounds: [-5,5,-5,5],
+    global: {x:0, y:0, z:0},
+    scale: 0.15,
+    meta: ['قعر مركزي','تموج خارجي','أبعاد:2','صعب على HC']
+  },
+  sphere: {
+    name: 'Sphere',
+    f: (x,y) => x*x + y*y,
+    bounds: [-5,5,-5,5],
+    global: {x:0, y:0, z:0},
+    scale: 0.07,
+    meta: ['أبسط دالة','تحدّب','HC يحلها بسهولة','نقطة واحدة فقط']
+  },
+  eggholder: {
+    name: 'Egg-Holder (مصغّر)',
+    f: (x,y) => {
+      const xx = x*60, yy = y*60;
+      return -(yy+47)*Math.sin(Math.sqrt(Math.abs(yy+xx/2+47))) - xx*Math.sin(Math.sqrt(Math.abs(xx-(yy+47))));
+    },
+    bounds: [-5,5,-5,5],
+    global: {x:0, y:0, z:0},
+    scale: 0.002,
+    meta: ['شديد الوعورة','معدّل للعرض','اختبار قاسٍ','RS يتفوق هنا']
+  }
+};
+
+const ALGOS = {
+  rs: {
+    name: 'Random Search',
+    color: 0x06d4cd,
+    colorHex: '#06d4cd',
+    desc: '<strong class="algo-name" style="color:var(--rs)">Random Search</strong><br>يولّد حلولاً عشوائية تماماً في كل تكرار ويحتفظ بالأفضل. <strong>لا ذاكرة، لا تعلم</strong>. ميزته الوحيدة: الاستكشاف الشامل بدون انحياز. عيبه: لا يستفيد من المعلومات السابقة.'
+  },
+  hc: {
+    name: 'Hill Climbing',
+    color: 0x10b981,
+    colorHex: '#10b981',
+    desc: '<strong class="algo-name" style="color:var(--hc)">Hill Climbing</strong><br>يفحص الجيران ويتحرك للأفضل منهم فقط. <strong>سريع جداً</strong>، لكنه يعلق في أول قمة محلية يصلها. مثل أعمى يصعد دائماً للأعلى — قد ينتهي في تل صغير لا في الجبل.'
+  },
+  sa: {
+    name: 'Simulated Annealing',
+    color: 0xfb923c,
+    colorHex: '#fb923c',
+    desc: '<strong class="algo-name" style="color:var(--sa)">Simulated Annealing</strong><br>يقبل أحياناً حلاً <strong>أسوأ</strong> باحتمال exp(-Δ/T). عندما T عالية → يقفز بحرية، وعندما تبرد → يصبح كـ HC. هكذا يهرب من الفخاخ المحلية.'
+  },
+  tabu: {
+    name: 'Tabu Search',
+    color: 0xc084fc,
+    colorHex: '#c084fc',
+    desc: '<strong class="algo-name" style="color:var(--tabu)">Tabu Search</strong><br>يحتفظ <strong>بذاكرة</strong> للأماكن التي زارها مؤخراً ويحظرها لعدد من الدورات. هذا يجبره على استكشاف مناطق جديدة بدلاً من الدوران في نفس المكان.'
+  }
+};
+
+// ═══════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════
+const state = {
+  func: 'rastrigin',
+  algo: 'all',
+  maxIter: 60,
+  speed: 120,
+  x0: 2.5, y0: -3.0,
+  step: 0.5,
+  T0: 5.0,
+  cool: 0.95,
+  tenure: 5,
+  showRSAll: true,
+  playing: false,
+  optimizers: {},
+  lastStep: 0,
+};
+
+// ═══════════════════════════════════════════════════════════════
+// OPTIMIZERS
+// ═══════════════════════════════════════════════════════════════
+function rand() { return Math.random(); }
+function randBetween(a,b) { return a + Math.random()*(b-a); }
+function clamp(v, mi, ma) { return Math.max(mi, Math.min(ma, v)); }
+
+function makeOptimizer(algo, fn, params) {
+  const b = fn.bounds;
+  const o = {
+    algo,
+    fn,
+    params,
+    path: [],
+    best: null,
+    iter: 0,
+    done: false,
+  };
+
+  if (algo === 'rs') {
+    o.allSamples = [];
+  } else {
+    const sx = clamp(params.x0, b[0], b[1]);
+    const sy = clamp(params.y0, b[2], b[3]);
+    const sz = fn.f(sx, sy);
+    o.current = {x:sx, y:sy, z:sz};
+    o.best = {...o.current};
+    o.path.push({x:sx, y:sy, z:sz, kind:'start'});
+    if (algo === 'sa') o.T = params.T0;
+    if (algo === 'tabu') o.tabu = [];
+  }
+  return o;
+}
+
+function gridCell(x, y) {
+  return [Math.round(x*2), Math.round(y*2)];
+}
+
+function stepOptimizer(o) {
+  if (o.done) return;
+  const fn = o.fn, p = o.params, b = fn.bounds;
+
+  if (o.algo === 'rs') {
+    const x = randBetween(b[0], b[1]);
+    const y = randBetween(b[2], b[3]);
+    const z = fn.f(x, y);
+    const improved = !o.best || z < o.best.z;
+    if (improved) o.best = {x, y, z};
+    o.allSamples.push({x, y, z, improved});
+    if (improved) o.path.push({x, y, z, kind:'best'});
+    o.iter++;
+
+  } else if (o.algo === 'hc') {
+    const dirs = 12;
+    let bestN = null;
+    for (let i = 0; i < dirs; i++) {
+      const ang = (i/dirs) * 2*Math.PI;
+      const nx = clamp(o.current.x + p.step*Math.cos(ang), b[0], b[1]);
+      const ny = clamp(o.current.y + p.step*Math.sin(ang), b[2], b[3]);
+      const nz = fn.f(nx, ny);
+      if (!bestN || nz < bestN.z) bestN = {x:nx, y:ny, z:nz};
+    }
+    if (bestN.z < o.current.z) {
+      o.current = bestN;
+      if (bestN.z < o.best.z) o.best = {...bestN};
+      o.path.push({...bestN, kind:'improve'});
+    } else {
+      o.path.push({...o.current, kind:'stuck'});
+      o.done = true;
+    }
+    o.iter++;
+
+  } else if (o.algo === 'sa') {
+    const ang = rand()*2*Math.PI;
+    const r = p.step * (0.4 + 0.8*rand());
+    const nx = clamp(o.current.x + r*Math.cos(ang), b[0], b[1]);
+    const ny = clamp(o.current.y + r*Math.sin(ang), b[2], b[3]);
+    const nz = fn.f(nx, ny);
+    const delta = nz - o.current.z;
+    let accept = false, worse = false;
+    if (delta < 0) accept = true;
+    else if (o.T > 1e-10 && Math.exp(-delta / o.T) > rand()) { accept = true; worse = true; }
+
+    if (accept) {
+      o.current = {x:nx, y:ny, z:nz};
+      if (nz < o.best.z) o.best = {...o.current};
+      o.path.push({x:nx, y:ny, z:nz, kind: worse ? 'worse' : 'improve', T: o.T});
+    } else {
+      o.path.push({x:o.current.x, y:o.current.y, z:o.current.z, kind:'reject', T:o.T});
+    }
+    o.T *= p.cool;
+    o.iter++;
+
+  } else if (o.algo === 'tabu') {
+    const dirs = 12;
+    let candidates = [];
+    for (let i = 0; i < dirs; i++) {
+      const ang = (i/dirs) * 2*Math.PI;
+      const nx = clamp(o.current.x + p.step*Math.cos(ang), b[0], b[1]);
+      const ny = clamp(o.current.y + p.step*Math.sin(ang), b[2], b[3]);
+      const nz = fn.f(nx, ny);
+      const cell = gridCell(nx, ny);
+      const tabu = o.tabu.some(t => t.gx===cell[0] && t.gy===cell[1]);
+      candidates.push({x:nx, y:ny, z:nz, cell, tabu});
+    }
+    const nonTabu = candidates.filter(c => !c.tabu);
+    let best;
+    if (nonTabu.length) {
+      best = nonTabu.reduce((a,c) => c.z<a.z?c:a);
+      const allBest = candidates.reduce((a,c) => c.z<a.z?c:a);
+      if (allBest.z < o.best.z && allBest !== best) best = {...allBest, aspiration:true};
+    } else {
+      best = candidates.reduce((a,c) => c.z<a.z?c:a);
+    }
+
+    const curCell = gridCell(o.current.x, o.current.y);
+    o.tabu.push({gx:curCell[0], gy:curCell[1], ttl:p.tenure});
+    o.tabu = o.tabu.map(t => ({...t, ttl:t.ttl-1})).filter(t => t.ttl>0);
+
+    o.current = {x:best.x, y:best.y, z:best.z};
+    if (best.z < o.best.z) o.best = {...o.current};
+    o.path.push({...o.current, kind: best.aspiration?'aspiration':(best.z<(o.path[o.path.length-1]?.z??Infinity)?'improve':'lateral')});
+    o.iter++;
+  }
+
+  if (o.iter >= p.maxIter) o.done = true;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 3D SCENE
+// ═══════════════════════════════════════════════════════════════
+const view3dEl = document.getElementById('view3d');
+const scene = new THREE.Scene();
+scene.fog = new THREE.Fog(0x07090f, 12, 30);
+const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+camera.position.set(8, 7, 8);
+const renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
+renderer.setPixelRatio(window.devicePixelRatio);
+renderer.setClearColor(0x07090f, 1);
+view3dEl.appendChild(renderer.domElement);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+controls.target.set(0,0,0);
+
+scene.add(new THREE.AmbientLight(0x9eb1d4, 0.5));
+const dir1 = new THREE.DirectionalLight(0xffffff, 0.7);
+dir1.position.set(6, 10, 4);
+scene.add(dir1);
+const dir2 = new THREE.DirectionalLight(0x06d4cd, 0.4);
+dir2.position.set(-6, 5, -3);
+scene.add(dir2);
+
+let surfaceMesh = null;
+let globalMarker = null;
+const algoGroups = { rs: new THREE.Group(), hc: new THREE.Group(), sa: new THREE.Group(), tabu: new THREE.Group() };
+Object.values(algoGroups).forEach(g => scene.add(g));
+
+function rebuildSurface() {
+  if (surfaceMesh) {
+    scene.remove(surfaceMesh);
+    if (surfaceMesh.userData.wire) scene.remove(surfaceMesh.userData.wire);
+    surfaceMesh.geometry.dispose();
+    surfaceMesh.material.dispose();
+  }
+
+  const fn = FUNCS[state.func];
+  const SIZE = 10;
+  const SEG = 120;
+  const geom = new THREE.PlaneGeometry(SIZE, SIZE, SEG, SEG);
+  const pos = geom.attributes.position;
+  const colors = new Float32Array(pos.count*3);
+  const colorA = new THREE.Color(0x0a1a2a);
+  const colorB = new THREE.Color(0x06d4cd);
+  const colorC = new THREE.Color(0xfbbf24);
+
+  let minZ = Infinity, maxZ = -Infinity;
+  const zs = [];
+  for (let i = 0; i < pos.count; i++) {
+    const px = pos.getX(i), py = pos.getY(i);
+    const wx = (px / SIZE) * (fn.bounds[1]-fn.bounds[0]);
+    const wy = (py / SIZE) * (fn.bounds[3]-fn.bounds[2]);
+    const z = fn.f(wx, wy);
+    zs.push(z);
+    if (z < minZ) minZ = z;
+    if (z > maxZ) maxZ = z;
+  }
+  const range = maxZ - minZ || 1;
+  for (let i = 0; i < pos.count; i++) {
+    const z = zs[i];
+    const t = Math.min(1, (z - minZ) / range);
+    pos.setZ(i, (z - minZ) * fn.scale * 1.5);
+    const c = new THREE.Color();
+    if (t < 0.5) c.lerpColors(colorA, colorB, t*2);
+    else c.lerpColors(colorB, colorC, (t-0.5)*2);
+    colors[i*3] = c.r; colors[i*3+1] = c.g; colors[i*3+2] = c.b;
+  }
+  geom.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  geom.computeVertexNormals();
+
+  const mat = new THREE.MeshStandardMaterial({
+    vertexColors: true,
+    side: THREE.DoubleSide,
+    roughness: 0.6,
+    metalness: 0.1,
+  });
+  surfaceMesh = new THREE.Mesh(geom, mat);
+  surfaceMesh.rotation.x = -Math.PI/2;
+  scene.add(surfaceMesh);
+
+  const wireMat = new THREE.LineBasicMaterial({color: 0x223355, transparent:true, opacity:0.18});
+  const wireGeom = new THREE.WireframeGeometry(geom);
+  const wire = new THREE.LineSegments(wireGeom, wireMat);
+  wire.rotation.x = -Math.PI/2;
+  scene.add(wire);
+  surfaceMesh.userData = { minZ, maxZ, SIZE, fn, wire };
+
+  // Global minimum marker
+  if (globalMarker) scene.remove(globalMarker);
+  const g = fn.global;
+  const gx = (g.x / ((fn.bounds[1]-fn.bounds[0])/2)) * (SIZE/2);
+  const gy_w = (g.y / ((fn.bounds[3]-fn.bounds[2])/2)) * (SIZE/2);
+  const gz = (fn.f(g.x,g.y) - minZ) * fn.scale * 1.5;
+  globalMarker = new THREE.Group();
+  const beam = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.04, 0.04, 12, 8),
+    new THREE.MeshBasicMaterial({color:0xfbbf24, transparent:true, opacity:0.35})
+  );
+  beam.position.set(gx, 6, gy_w);
+  globalMarker.add(beam);
+  const sph = new THREE.Mesh(
+    new THREE.SphereGeometry(0.15, 16, 16),
+    new THREE.MeshBasicMaterial({color:0xfbbf24})
+  );
+  sph.position.set(gx, gz + 0.15, gy_w);
+  globalMarker.add(sph);
+  scene.add(globalMarker);
+}
+
+function worldFromXY(x, y) {
+  const d = surfaceMesh.userData;
+  const fn = d.fn;
+  const SIZE = d.SIZE;
+  const sx = (x / ((fn.bounds[1]-fn.bounds[0])/2)) * (SIZE/2);
+  const sy_w = (y / ((fn.bounds[3]-fn.bounds[2])/2)) * (SIZE/2);
+  const sz = (fn.f(x,y) - d.minZ) * fn.scale * 1.5;
+  return [sx, sz + 0.1, sy_w];
+}
+
+function clearAlgoGroup(algo) {
+  const g = algoGroups[algo];
+  while (g.children.length) {
+    const c = g.children[0];
+    g.remove(c);
+    if (c.geometry) c.geometry.dispose();
+    if (c.material) c.material.dispose();
+  }
+}
+
+function renderAlgoPath(algo) {
+  clearAlgoGroup(algo);
+  const o = state.optimizers[algo];
+  if (!o || !surfaceMesh) return;
+  const color = new THREE.Color(ALGOS[algo].color);
+  const group = algoGroups[algo];
+
+  if (algo === 'rs') {
+    if (state.showRSAll && o.allSamples) {
+      for (const s of o.allSamples) {
+        const [sx, sz, sy] = worldFromXY(s.x, s.y);
+        const m = new THREE.Mesh(
+          new THREE.SphereGeometry(0.06, 8, 8),
+          new THREE.MeshBasicMaterial({color, transparent:true, opacity: s.improved ? 0.95 : 0.18})
+        );
+        m.position.set(sx, sz, sy);
+        group.add(m);
+      }
+    }
+    if (o.path.length > 1) {
+      const pts = o.path.map(p => { const [sx,sz,sy] = worldFromXY(p.x,p.y); return new THREE.Vector3(sx,sz,sy); });
+      group.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), new THREE.LineBasicMaterial({color})));
+    }
+    if (o.best) {
+      const [sx,sz,sy] = worldFromXY(o.best.x, o.best.y);
+      const m = new THREE.Mesh(new THREE.SphereGeometry(0.16,16,16), new THREE.MeshBasicMaterial({color}));
+      m.position.set(sx,sz,sy);
+      group.add(m);
+    }
+  } else {
+    if (o.path.length > 1) {
+      const pts = o.path.map(p => { const [sx,sz,sy] = worldFromXY(p.x,p.y); return new THREE.Vector3(sx,sz,sy); });
+      group.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), new THREE.LineBasicMaterial({color})));
+    }
+    for (let i = 0; i < o.path.length; i++) {
+      const p = o.path[i];
+      const [sx,sz,sy] = worldFromXY(p.x, p.y);
+      const isLast = i === o.path.length - 1;
+      const isStart = p.kind === 'start';
+      let op = 0.7;
+      if (p.kind === 'worse') op = 0.5;
+      if (p.kind === 'reject') op = 0.2;
+      if (isLast) op = 1.0;
+      const m = new THREE.Mesh(
+        new THREE.SphereGeometry(isLast ? 0.16 : (isStart ? 0.12 : 0.07), 12, 12),
+        new THREE.MeshBasicMaterial({color, transparent:op<1, opacity:op})
+      );
+      m.position.set(sx,sz,sy);
+      group.add(m);
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 2D CANVAS
+// ═══════════════════════════════════════════════════════════════
+const view2d = document.getElementById('view2d');
+const ctx = view2d.getContext('2d');
+let heatmapCanvas = null;
+
+function lerp(a, b, t) { return a + (b-a)*t; }
+
+function rebuildHeatmap() {
+  const fn = FUNCS[state.func];
+  const N = 200;
+  const zs = new Float32Array(N*N);
+  let mi = Infinity, ma = -Infinity;
+  for (let j = 0; j < N; j++) {
+    for (let i = 0; i < N; i++) {
+      const x = fn.bounds[0] + (i/(N-1))*(fn.bounds[1]-fn.bounds[0]);
+      const y = fn.bounds[2] + (j/(N-1))*(fn.bounds[3]-fn.bounds[2]);
+      const z = fn.f(x,y);
+      zs[j*N+i] = z;
+      if (z<mi) mi=z; if (z>ma) ma=z;
+    }
+  }
+  const off = document.createElement('canvas');
+  off.width = N; off.height = N;
+  const octx = off.getContext('2d');
+  const img = octx.createImageData(N, N);
+  const range = ma - mi || 1;
+  for (let j = 0; j < N; j++) {
+    for (let i = 0; i < N; i++) {
+      const t = (zs[j*N+i] - mi) / range;
+      let r, g, b;
+      if (t < 0.5) {
+        const k = t*2;
+        r = lerp(10, 6, k); g = lerp(26, 212, k); b = lerp(42, 205, k);
+      } else {
+        const k = (t-0.5)*2;
+        r = lerp(6, 251, k); g = lerp(212, 191, k); b = lerp(205, 36, k);
+      }
+      const idx = ((N-1-j)*N + i) * 4;
+      img.data[idx]=r; img.data[idx+1]=g; img.data[idx+2]=b; img.data[idx+3]=255;
+    }
+  }
+  octx.putImageData(img, 0, 0);
+  heatmapCanvas = off;
+}
+
+function w2c(x, y) {
+  const fn = FUNCS[state.func];
+  const W = view2d.width, H = view2d.height;
+  const cx = ((x - fn.bounds[0]) / (fn.bounds[1]-fn.bounds[0])) * W;
+  const cy = H - ((y - fn.bounds[2]) / (fn.bounds[3]-fn.bounds[2])) * H;
+  return [cx, cy];
+}
+
+function draw2D() {
+  const W = view2d.width, H = view2d.height;
+  ctx.clearRect(0, 0, W, H);
+  if (heatmapCanvas) ctx.drawImage(heatmapCanvas, 0, 0, W, H);
+
+  ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+  ctx.lineWidth = 1;
+  for (let i = 1; i < 10; i++) {
+    const x = (i/10)*W, y = (i/10)*H;
+    ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke();
+  }
+
+  const fn = FUNCS[state.func];
+  const [gx, gy] = w2c(fn.global.x, fn.global.y);
+  ctx.save();
+  ctx.shadowColor = '#fbbf24'; ctx.shadowBlur = 18;
+  ctx.fillStyle = '#fbbf24';
+  ctx.beginPath(); ctx.arc(gx, gy, 5, 0, 2*Math.PI); ctx.fill();
+  ctx.shadowBlur = 0;
+  ctx.strokeStyle = 'rgba(251,191,36,0.5)'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.arc(gx, gy, 11, 0, 2*Math.PI); ctx.stroke();
+  ctx.restore();
+
+  const activeList = state.algo === 'all' ? ['rs','hc','sa','tabu'] : [state.algo];
+  for (const a of activeList) {
+    const o = state.optimizers[a];
+    if (!o) continue;
+    const color = ALGOS[a].colorHex;
+
+    if (a === 'rs') {
+      if (state.showRSAll && o.allSamples) {
+        for (const s of o.allSamples) {
+          const [cx, cy] = w2c(s.x, s.y);
+          ctx.fillStyle = s.improved ? color : color + '55';
+          ctx.beginPath(); ctx.arc(cx, cy, s.improved ? 4 : 2.2, 0, 2*Math.PI); ctx.fill();
+        }
+      }
+      if (o.path.length > 1) {
+        ctx.strokeStyle = color; ctx.lineWidth = 1.5; ctx.setLineDash([4,3]);
+        ctx.beginPath();
+        for (let i = 0; i < o.path.length; i++) {
+          const [cx,cy] = w2c(o.path[i].x, o.path[i].y);
+          i===0 ? ctx.moveTo(cx,cy) : ctx.lineTo(cx,cy);
+        }
+        ctx.stroke(); ctx.setLineDash([]);
+      }
+      if (o.best) {
+        const [bx,by] = w2c(o.best.x, o.best.y);
+        ctx.save(); ctx.shadowColor=color; ctx.shadowBlur=12;
+        ctx.fillStyle=color; ctx.beginPath(); ctx.arc(bx,by,6,0,2*Math.PI); ctx.fill();
+        ctx.restore();
+      }
+    } else {
+      if (o.path.length > 1) {
+        ctx.strokeStyle = color; ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        for (let i = 0; i < o.path.length; i++) {
+          const [cx,cy] = w2c(o.path[i].x, o.path[i].y);
+          i===0 ? ctx.moveTo(cx,cy) : ctx.lineTo(cx,cy);
+        }
+        ctx.stroke();
+        for (let i = 1; i < o.path.length; i++) {
+          const [x1,y1] = w2c(o.path[i-1].x, o.path[i-1].y);
+          const [x2,y2] = w2c(o.path[i].x, o.path[i].y);
+          drawArrow(x1,y1,x2,y2,color);
+        }
+      }
+      for (let i = 0; i < o.path.length; i++) {
+        const p = o.path[i];
+        const [cx,cy] = w2c(p.x, p.y);
+        const isLast = i===o.path.length-1;
+        let r=3;
+        ctx.globalAlpha = p.kind==='worse'?0.6 : p.kind==='reject'?0.25 : 1;
+        if (p.kind==='start') r=5;
+        if (isLast) { r=6; ctx.save(); ctx.shadowColor=color; ctx.shadowBlur=14; }
+        ctx.fillStyle = color;
+        ctx.beginPath(); ctx.arc(cx,cy,r,0,2*Math.PI); ctx.fill();
+        if (isLast) ctx.restore();
+        ctx.globalAlpha = 1;
+      }
+      if (o.path[0]) {
+        const [sx,sy] = w2c(o.path[0].x, o.path[0].y);
+        ctx.fillStyle='#fff'; ctx.font='600 9px JetBrains Mono'; ctx.textAlign='center';
+        ctx.fillText('S', sx, sy+3);
+      }
+    }
+  }
+}
+
+function drawArrow(x1,y1,x2,y2,color) {
+  const dx=x2-x1, dy=y2-y1, len=Math.sqrt(dx*dx+dy*dy);
+  if (len<8) return;
+  const mx=x1+dx*0.55, my=y1+dy*0.55, ang=Math.atan2(dy,dx), al=6;
+  ctx.fillStyle=color;
+  ctx.beginPath();
+  ctx.moveTo(mx,my);
+  ctx.lineTo(mx-al*Math.cos(ang-0.4), my-al*Math.sin(ang-0.4));
+  ctx.lineTo(mx-al*Math.cos(ang+0.4), my-al*Math.sin(ang+0.4));
+  ctx.closePath(); ctx.fill();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// STATS
+// ═══════════════════════════════════════════════════════════════
+function updateStats() {
+  const container = document.getElementById('stats');
+  const list = state.algo==='all' ? ['rs','hc','sa','tabu'] : [state.algo];
+  let html = '';
+  for (const a of list) {
+    const o = state.optimizers[a];
+    if (!o || !o.best) {
+      html += `<div class="stat-card ${a}"><div class="label"><span style="color:var(--${a})">${ALGOS[a].name}</span><span class="badge idle">جاهز</span></div><div class="value" style="color:var(--text-dim)">—</div></div>`;
+      continue;
+    }
+    const status = o.done ? `<span class="badge done">انتهى</span>` :
+                   state.playing ? `<span class="badge live pulse">يعمل</span>` :
+                   `<span class="badge idle">متوقف</span>`;
+    const dist = Math.sqrt((o.best.x-o.fn.global.x)**2+(o.best.y-o.fn.global.y)**2);
+    let extra = `<div class="extra"><span>الخطوات: ${o.path.length}</span><span>المسافة: ${dist.toFixed(2)}</span></div>`;
+    if (a==='sa' && o.T!==undefined) extra=`<div class="extra"><span>T = ${o.T.toFixed(3)}</span><span>المسافة: ${dist.toFixed(2)}</span></div>`;
+    if (a==='tabu' && o.tabu) extra=`<div class="extra"><span>محظور: ${o.tabu.length}</span><span>المسافة: ${dist.toFixed(2)}</span></div>`;
+    html += `<div class="stat-card ${a}">
+      <div class="label"><span style="color:var(--${a})">${ALGOS[a].name}</span>
+      <span>${status}<span class="iter" style="margin-right:6px">${o.iter}/${o.params.maxIter}</span></span></div>
+      <div class="value" style="color:var(--${a})">${o.best.z.toFixed(4)}</div>
+      <div class="pos">x=${o.best.x.toFixed(2)}, y=${o.best.y.toFixed(2)}</div>
+      ${extra}
+    </div>`;
+  }
+  container.innerHTML = html;
+}
+
+function updateAlgoInfo() {
+  const el = document.getElementById('algoInfo');
+  if (state.algo==='all') {
+    el.innerHTML = `<strong>وضع المقارنة</strong><br>الأربع تعمل بالتوازي على نفس الدالة. راقب:<br>
+      • <span style="color:var(--rs)">Random</span> يرشّ النقاط بلا نظام<br>
+      • <span style="color:var(--hc)">Hill</span> يصعد فوراً ويعلق<br>
+      • <span style="color:var(--sa)">SA</span> يقفز أحياناً للخلف<br>
+      • <span style="color:var(--tabu)">Tabu</span> يتجنب التكرار`;
+  } else {
+    el.innerHTML = ALGOS[state.algo].desc;
+  }
+}
+
+function updateFnMeta() {
+  const fn = FUNCS[state.func];
+  document.getElementById('fnMeta').innerHTML = fn.meta.map(m=>`<span>${m}</span>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CORE
+// ═══════════════════════════════════════════════════════════════
+function resizeAll() {
+  const r3 = view3dEl.getBoundingClientRect();
+  renderer.setSize(r3.width, r3.height);
+  camera.aspect = r3.width / r3.height;
+  camera.updateProjectionMatrix();
+
+  const r2 = view2d.parentElement.getBoundingClientRect();
+  const dpr = window.devicePixelRatio;
+  view2d.width = r2.width * dpr;
+  view2d.height = r2.height * dpr;
+  view2d.style.width = r2.width + 'px';
+  view2d.style.height = r2.height + 'px';
+  ctx.scale(dpr, dpr);
+  rebuildHeatmap();
+  draw2D();
+}
+
+function buildOptimizers() {
+  state.optimizers = {};
+  const fn = FUNCS[state.func];
+  const params = { maxIter:state.maxIter, x0:state.x0, y0:state.y0, step:state.step, T0:state.T0, cool:state.cool, tenure:state.tenure };
+  const list = state.algo==='all' ? ['rs','hc','sa','tabu'] : [state.algo];
+  for (const a of list) state.optimizers[a] = makeOptimizer(a, fn, params);
+}
+
+function reset() {
+  state.playing = false;
+  const btn = document.getElementById('playBtn');
+  btn.textContent = '▶ تشغيل'; btn.classList.remove('playing');
+  buildOptimizers();
+  for (const a of ['rs','hc','sa','tabu']) {
+    if (state.algo==='all' || state.algo===a) renderAlgoPath(a);
+    else clearAlgoGroup(a);
+  }
+  draw2D(); updateStats();
+}
+
+function doStep() {
+  let anyAlive = false;
+  for (const a of Object.keys(state.optimizers)) {
+    const o = state.optimizers[a];
+    if (!o.done) { stepOptimizer(o); renderAlgoPath(a); anyAlive = true; }
+  }
+  draw2D(); updateStats();
+  return anyAlive;
+}
+
+let lastTime = 0;
+function animate(t) {
+  requestAnimationFrame(animate);
+  controls.update();
+  if (globalMarker) {
+    globalMarker.children[0].rotation.y += 0.01;
+    const s = 1 + 0.18*Math.sin(t*0.004);
+    globalMarker.children[1].scale.setScalar(s);
+  }
+  if (state.playing && (t - lastTime) > state.speed) {
+    const alive = doStep();
+    lastTime = t;
+    if (!alive) {
+      state.playing = false;
+      const btn = document.getElementById('playBtn');
+      btn.textContent = '▶ تشغيل'; btn.classList.remove('playing');
+    }
+  }
+  renderer.render(scene, camera);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// UI WIRING
+// ═══════════════════════════════════════════════════════════════
+function bindRange(id, stateKey, fmt, onChange) {
+  const el = document.getElementById(id);
+  const capId = 'v' + id.charAt(0).toUpperCase() + id.slice(1);
+  const lab = document.getElementById(capId);
+  el.addEventListener('input', () => {
+    state[stateKey] = parseFloat(el.value);
+    if (lab) lab.textContent = fmt ? fmt(state[stateKey]) : state[stateKey];
+    if (onChange) onChange();
+  });
+  state[stateKey] = parseFloat(el.value);
+  if (lab) lab.textContent = fmt ? fmt(state[stateKey]) : state[stateKey];
+}
+
+bindRange('maxIter','maxIter');
+bindRange('speed','speed', v => v+'ms');
+bindRange('x0','x0', v => v.toFixed(1), reset);
+bindRange('y0','y0', v => v.toFixed(1), reset);
+bindRange('step','step', v => v.toFixed(2));
+bindRange('T0','T0', v => v.toFixed(1));
+bindRange('cool','cool', v => v.toFixed(2));
+bindRange('tenure','tenure');
+
+document.getElementById('funcSelect').addEventListener('change', e => {
+  state.func = e.target.value;
+  rebuildSurface();
+  rebuildHeatmap();
+  updateFnMeta();
+  reset();
+});
+
+document.querySelectorAll('input[name=algo]').forEach(r => {
+  r.addEventListener('change', () => {
+    state.algo = document.querySelector('input[name=algo]:checked').value;
+    updateAlgoInfo();
+    reset();
+  });
+});
+
+document.getElementById('showRSAll').addEventListener('change', e => {
+  state.showRSAll = e.target.checked;
+  if (state.optimizers.rs) renderAlgoPath('rs');
+  draw2D();
+});
+
+document.getElementById('playBtn').addEventListener('click', e => {
+  state.playing = !state.playing;
+  e.target.textContent = state.playing ? '⏸ إيقاف' : '▶ تشغيل';
+  e.target.classList.toggle('playing', state.playing);
+  updateStats();
+});
+
+document.getElementById('stepBtn').addEventListener('click', () => {
+  state.playing = false;
+  document.getElementById('playBtn').textContent = '▶ تشغيل';
+  document.getElementById('playBtn').classList.remove('playing');
+  doStep();
+});
+
+document.getElementById('resetBtn').addEventListener('click', reset);
+
+window.addEventListener('resize', resizeAll);
+
+// 2D tooltip
+const tip = document.getElementById('tooltip');
+view2d.addEventListener('mousemove', e => {
+  const rect = view2d.getBoundingClientRect();
+  const px = (e.clientX - rect.left) / rect.width;
+  const py = (e.clientY - rect.top) / rect.height;
+  const fn = FUNCS[state.func];
+  const x = fn.bounds[0] + px*(fn.bounds[1]-fn.bounds[0]);
+  const y = fn.bounds[2] + (1-py)*(fn.bounds[3]-fn.bounds[2]);
+  tip.style.display = 'block';
+  tip.style.left = (e.clientX - rect.left + 12) + 'px';
+  tip.style.top = (e.clientY - rect.top + 12) + 'px';
+  tip.textContent = `x=${x.toFixed(2)}  y=${y.toFixed(2)}  f=${fn.f(x,y).toFixed(3)}`;
+});
+view2d.addEventListener('mouseleave', () => tip.style.display='none');
+
+view2d.addEventListener('click', e => {
+  const rect = view2d.getBoundingClientRect();
+  const px = (e.clientX - rect.left) / rect.width;
+  const py = (e.clientY - rect.top) / rect.height;
+  const fn = FUNCS[state.func];
+  const x = fn.bounds[0] + px*(fn.bounds[1]-fn.bounds[0]);
+  const y = fn.bounds[2] + (1-py)*(fn.bounds[3]-fn.bounds[2]);
+  state.x0 = parseFloat(x.toFixed(1));
+  state.y0 = parseFloat(y.toFixed(1));
+  document.getElementById('x0').value = state.x0;
+  document.getElementById('y0').value = state.y0;
+  document.getElementById('vX0').textContent = state.x0;
+  document.getElementById('vY0').textContent = state.y0;
+  reset();
+});
+
+// ═══════════════════════════════════════════════════════════════
+// BOOT
+// ═══════════════════════════════════════════════════════════════
+rebuildSurface();
+updateFnMeta();
+resizeAll();
+buildOptimizers();
+updateAlgoInfo();
+updateStats();
+draw2D();
+animate(0);
+</script>
+</body>
+</html>
