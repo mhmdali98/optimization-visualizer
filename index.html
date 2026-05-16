@@ -17,24 +17,32 @@
 </script>
 <style>
 :root {
-  --bg-deep: #07090f;
-  --bg: #0c1018;
-  --bg-card: #131826;
+  --bg-deep: #05070d;
+  --bg: #0a0e17;
+  --bg-card: #11162280;
+  --bg-card-solid: #131826;
   --bg-elev: #1a2030;
-  --border: #232a3d;
+  --bg-glass: rgba(19, 24, 38, 0.55);
+  --bg-glass-strong: rgba(19, 24, 38, 0.85);
+  --border: #1f2638;
+  --border-soft: rgba(255, 255, 255, 0.06);
   --border-strong: #2e3651;
-  --text: #e6ebf5;
-  --text-mid: #94a3b8;
-  --text-dim: #64748b;
+  --text: #eef2fa;
+  --text-mid: #9aa6bd;
+  --text-dim: #5d6b85;
   --gold: #fbbf24;
-  --rs: #06d4cd;
-  --hc: #10b981;
+  --rs: #22e3dc;
+  --hc: #34d399;
   --sa: #fb923c;
   --tabu: #c084fc;
-  --rs-dim: #06d4cd33;
-  --hc-dim: #10b98133;
-  --sa-dim: #fb923c33;
-  --tabu-dim: #c084fc33;
+  --rs-dim: #22e3dc1a;
+  --hc-dim: #34d3991a;
+  --sa-dim: #fb923c1a;
+  --tabu-dim: #c084fc1a;
+  --shadow-soft: 0 1px 2px rgba(0,0,0,0.4), 0 8px 24px rgba(0,0,0,0.25);
+  --shadow-glow-rs: 0 0 0 1px rgba(34,227,220,0.4), 0 8px 24px -8px rgba(34,227,220,0.4);
+  --grad-brand: linear-gradient(135deg, #22e3dc 0%, #c084fc 100%);
+  --grad-card: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0) 100%);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -49,15 +57,33 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Background pattern */
+/* Ambient background — slow aurora */
 body::before {
   content: '';
   position: fixed;
-  inset: 0;
+  inset: -10%;
   background:
-    radial-gradient(ellipse at top right, #1a2342 0%, transparent 50%),
-    radial-gradient(ellipse at bottom left, #1a1a3a 0%, transparent 60%);
+    radial-gradient(ellipse 70% 50% at 90% -10%, rgba(34,227,220,0.10) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 40% at 10% 110%, rgba(192,132,252,0.08) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 30% at 50% 50%, rgba(251,146,60,0.04) 0%, transparent 60%);
+  z-index: -2;
+  animation: drift 28s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 25% 25%, rgba(255,255,255,0.02) 1px, transparent 1px),
+    radial-gradient(circle at 75% 75%, rgba(255,255,255,0.015) 1px, transparent 1px);
+  background-size: 60px 60px, 80px 80px;
   z-index: -1;
+  pointer-events: none;
+}
+@keyframes drift {
+  0%   { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(-3%, 2%) scale(1.05); }
 }
 
 /* === LAYOUT === */
@@ -73,58 +99,124 @@ body::before {
   align-items: center;
   justify-content: space-between;
   padding: 0 24px;
-  background: rgba(12,16,24,0.7);
-  backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--border);
+  background: rgba(10, 14, 23, 0.7);
+  backdrop-filter: blur(24px) saturate(140%);
+  -webkit-backdrop-filter: blur(24px) saturate(140%);
+  border-bottom: 1px solid var(--border-soft);
   position: relative;
   z-index: 10;
 }
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.logo-mark {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(34,227,220,0.18), rgba(192,132,252,0.18));
+  border: 1px solid rgba(34,227,220,0.3);
+  box-shadow: 0 4px 14px -4px rgba(34,227,220,0.4);
+}
+.logo-mark svg { width: 18px; height: 18px; }
 .header h1 {
   font-family: 'Outfit', sans-serif;
-  font-weight: 300;
-  font-size: 18px;
-  letter-spacing: 0.5px;
+  font-weight: 400;
+  font-size: 17px;
+  letter-spacing: 0.2px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 .header h1 span {
   font-weight: 700;
-  background: linear-gradient(135deg, var(--rs), var(--tabu));
+  background: var(--grad-brand);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+.header h1 .divider-dot {
+  color: var(--text-dim);
+  font-weight: 300;
 }
 .header .sub {
   font-size: 12px;
   color: var(--text-dim);
   margin-right: 12px;
+  font-family: 'JetBrains Mono', monospace;
+}
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.header-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(to left, var(--rs), var(--tabu));
+  transform-origin: right;
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+  opacity: 0.7;
+}
+.fn-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: var(--bg-glass);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 11px;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text-mid);
+  letter-spacing: 0.5px;
+}
+.fn-chip .fn-chip-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--rs);
+  box-shadow: 0 0 8px var(--rs);
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
 }
 
 .main {
   display: grid;
-  grid-template-columns: 280px 1fr 280px;
+  grid-template-columns: 290px 1fr 290px;
   gap: 1px;
-  background: var(--border);
+  background: var(--border-soft);
   overflow: hidden;
 }
 
 .panel {
-  background: var(--bg);
+  background: linear-gradient(180deg, rgba(10,14,23,0.6) 0%, rgba(10,14,23,0.85) 100%);
+  backdrop-filter: blur(8px);
   overflow-y: auto;
-  padding: 18px;
+  padding: 18px 16px;
 }
 
 .viz {
-  background: var(--bg-deep);
+  background: linear-gradient(to bottom, var(--border-soft), rgba(34,227,220,0.08), var(--border-soft));
   display: grid;
   grid-template-rows: 1fr 1fr;
   gap: 1px;
   position: relative;
 }
-
 .view-wrap {
   position: relative;
   overflow: hidden;
   background: var(--bg-deep);
 }
+
 .view-label {
   position: absolute;
   top: 12px;
@@ -132,14 +224,27 @@ body::before {
   font-family: 'JetBrains Mono', monospace;
   font-size: 10px;
   letter-spacing: 1.5px;
-  color: var(--text-dim);
+  color: var(--text-mid);
   text-transform: uppercase;
   z-index: 3;
-  background: rgba(0,0,0,0.5);
-  padding: 4px 10px;
-  border-radius: 3px;
-  border: 1px solid var(--border);
+  background: rgba(7,9,15,0.7);
+  backdrop-filter: blur(10px);
+  padding: 5px 11px;
+  border-radius: 99px;
+  border: 1px solid var(--border-soft);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-weight: 600;
 }
+.view-label::before {
+  content: '';
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--rs);
+  box-shadow: 0 0 6px var(--rs);
+}
+.view-wrap[data-view="2d"] .view-label::before { background: var(--tabu); box-shadow: 0 0 6px var(--tabu); }
 
 #view3d, #view2d {
   width: 100%;
@@ -149,17 +254,27 @@ body::before {
 
 /* === CONTROLS === */
 .section {
-  margin-bottom: 20px;
+  margin-bottom: 22px;
 }
 .section-title {
   font-family: 'JetBrains Mono', monospace;
   font-size: 10px;
-  letter-spacing: 2px;
+  letter-spacing: 2.5px;
   color: var(--text-dim);
   text-transform: uppercase;
-  margin-bottom: 10px;
-  padding-bottom: 6px;
-  border-bottom: 1px solid var(--border);
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-soft);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.section-title::before {
+  content: '';
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: var(--rs);
+  box-shadow: 0 0 6px var(--rs);
 }
 
 select, input[type=range], button, .pill {
@@ -169,69 +284,86 @@ select, input[type=range], button, .pill {
 
 select {
   width: 100%;
-  padding: 9px 12px;
-  background: var(--bg-card);
+  padding: 11px 14px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0));
   color: var(--text);
-  border: 1px solid var(--border);
-  border-radius: 6px;
+  border: 1px solid var(--border-soft);
+  border-radius: 9px;
   cursor: pointer;
   outline: none;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  font-weight: 500;
+  font-size: 13px;
 }
 select:hover { border-color: var(--border-strong); }
-select:focus { border-color: var(--rs); }
+select:focus { border-color: var(--rs); box-shadow: 0 0 0 3px rgba(34,227,220,0.12); }
+option { background: var(--bg-card-solid); }
 
 .radio-group {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 6px;
+  gap: 7px;
 }
 .radio-group label {
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 10px 8px;
+  gap: 8px;
+  padding: 10px 11px;
   border: 1px solid var(--border);
-  border-radius: 6px;
-  background: var(--bg-card);
+  border-radius: 9px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.025), rgba(255,255,255,0));
   cursor: pointer;
   font-size: 12px;
-  transition: all 0.15s;
+  font-weight: 600;
+  transition: transform 0.15s ease, border-color 0.2s, box-shadow 0.2s, background 0.2s;
   position: relative;
   user-select: none;
+  overflow: hidden;
 }
-.radio-group label::before {
-  content: '';
-  position: absolute;
-  top: 0; right: 0;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  margin: 6px;
-  background: currentColor;
-  opacity: 0.5;
+.radio-group label:hover { border-color: var(--border-strong); transform: translateY(-1px); }
+.radio-group label .pill-icon {
+  width: 14px; height: 14px;
+  display: grid; place-items: center;
+  color: currentColor;
+  flex-shrink: 0;
+}
+.radio-group label .pill-icon svg { width: 14px; height: 14px; }
+.radio-group label .pill-text {
+  font-family: 'Cairo', sans-serif;
+  letter-spacing: 0.2px;
 }
 .radio-group label.rs { color: var(--rs); }
 .radio-group label.hc { color: var(--hc); }
 .radio-group label.sa { color: var(--sa); }
 .radio-group label.tabu { color: var(--tabu); }
-.radio-group label.all { color: var(--gold); grid-column: span 2; }
+.radio-group label.all { color: var(--gold); grid-column: span 2; justify-content: center; padding: 11px; }
 .radio-group input { display: none; }
 .radio-group input:checked + label {
-  background: var(--bg-elev);
+  background: rgba(255,255,255,0.06);
   border-color: currentColor;
-  box-shadow: 0 0 0 1px currentColor inset, 0 0 12px -2px currentColor;
+  box-shadow: 0 0 0 1px currentColor inset, 0 6px 22px -10px currentColor;
 }
-.radio-group input:checked + label::before { opacity: 1; }
+@supports (color: color-mix(in srgb, red 50%, blue)) {
+  .radio-group input:checked + label {
+    background: linear-gradient(180deg, color-mix(in srgb, currentColor 12%, transparent), color-mix(in srgb, currentColor 4%, transparent));
+  }
+  .radio-group input:checked + label::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 80% 50% at 50% 100%, color-mix(in srgb, currentColor 18%, transparent), transparent 70%);
+    pointer-events: none;
+  }
+}
 
 .field {
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 .field-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 6px;
+  margin-bottom: 7px;
   font-size: 12px;
 }
 .field-row .name { color: var(--text-mid); }
@@ -239,94 +371,139 @@ select:focus { border-color: var(--rs); }
   font-family: 'JetBrains Mono', monospace;
   color: var(--text);
   font-size: 11px;
-  background: var(--bg-card);
-  padding: 2px 8px;
-  border-radius: 3px;
-  border: 1px solid var(--border);
+  background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0));
+  padding: 3px 9px;
+  border-radius: 5px;
+  border: 1px solid var(--border-soft);
+  font-weight: 600;
 }
 
 input[type=range] {
   -webkit-appearance: none;
   appearance: none;
   width: 100%;
-  height: 4px;
-  background: var(--bg-card);
-  border-radius: 2px;
+  height: 6px;
+  background: linear-gradient(to left,
+    var(--track-fill, var(--rs)) 0%,
+    var(--track-fill, var(--rs)) var(--track-pct, 50%),
+    rgba(255,255,255,0.05) var(--track-pct, 50%),
+    rgba(255,255,255,0.05) 100%);
+  border-radius: 99px;
   outline: none;
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-soft);
+  transition: filter 0.15s;
 }
+input[type=range]:hover { filter: brightness(1.15); }
 input[type=range]::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 14px;
-  height: 14px;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
-  background: var(--text);
-  cursor: pointer;
+  background: linear-gradient(135deg, #f8fafc, #cbd5e1);
+  cursor: grab;
   border: 2px solid var(--bg-deep);
-  box-shadow: 0 0 0 1px var(--border-strong);
+  box-shadow: 0 0 0 1px var(--track-fill, var(--rs)),
+              0 0 12px -2px var(--track-fill, var(--rs));
+  transition: transform 0.1s;
 }
+input[type=range]::-webkit-slider-thumb:active { cursor: grabbing; transform: scale(1.15); }
 input[type=range]::-moz-range-thumb {
-  width: 14px;
-  height: 14px;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
-  background: var(--text);
-  cursor: pointer;
+  background: #f8fafc;
+  cursor: grab;
   border: 2px solid var(--bg-deep);
+  box-shadow: 0 0 0 1px var(--track-fill, var(--rs)),
+              0 0 12px -2px var(--track-fill, var(--rs));
 }
 
 .btn-row {
   display: grid;
   grid-template-columns: 2fr 1fr 1fr;
-  gap: 6px;
-  margin-top: 8px;
+  gap: 7px;
+  margin-top: 10px;
 }
 button {
-  padding: 10px 12px;
-  background: var(--bg-card);
+  padding: 11px 12px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0));
   color: var(--text);
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 9px;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: transform 0.1s, border-color 0.15s, background 0.15s, box-shadow 0.15s;
   font-weight: 600;
   font-size: 12px;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
 }
-button:hover { background: var(--bg-elev); border-color: var(--border-strong); }
-button:active { transform: scale(0.97); }
+button:hover {
+  background: linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.01));
+  border-color: var(--border-strong);
+}
+button:active { transform: scale(0.96); }
 button.primary {
-  background: linear-gradient(135deg, #0d9488, #06b6d4);
-  border: none;
-  color: white;
-  box-shadow: 0 0 16px -4px var(--rs);
+  background: linear-gradient(135deg, #0d9488 0%, #06b6d4 60%, #22e3dc 100%);
+  border: 1px solid rgba(34,227,220,0.5);
+  color: #fff;
+  box-shadow:
+    0 0 0 1px rgba(34,227,220,0.3) inset,
+    0 8px 24px -8px rgba(34,227,220,0.5),
+    0 2px 8px rgba(0,0,0,0.3);
+  position: relative;
+  overflow: hidden;
 }
-button.primary:hover { filter: brightness(1.1); }
+button.primary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.18), transparent 50%);
+  pointer-events: none;
+}
+button.primary:hover { filter: brightness(1.12) saturate(1.1); }
 button.primary.playing {
-  background: linear-gradient(135deg, #b91c1c, #f97316);
-  box-shadow: 0 0 16px -4px var(--sa);
+  background: linear-gradient(135deg, #b91c1c 0%, #ea580c 60%, #fb923c 100%);
+  border-color: rgba(251,146,60,0.5);
+  box-shadow:
+    0 0 0 1px rgba(251,146,60,0.3) inset,
+    0 8px 24px -8px rgba(251,146,60,0.5),
+    0 2px 8px rgba(0,0,0,0.3);
 }
 
 /* === STATS PANEL === */
 .stat-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 12px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.025), rgba(255,255,255,0)), var(--bg-glass);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--border-soft);
+  border-radius: 11px;
+  padding: 13px 14px 12px 18px;
   margin-bottom: 10px;
   position: relative;
   overflow: hidden;
+  transition: transform 0.15s, border-color 0.15s, box-shadow 0.2s;
 }
-.stat-card.rs::before { background: var(--rs); }
-.stat-card.hc::before { background: var(--hc); }
-.stat-card.sa::before { background: var(--sa); }
-.stat-card.tabu::before { background: var(--tabu); }
+.stat-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px -10px rgba(0,0,0,0.6);
+}
+.stat-card.rs   { --algo: var(--rs); }
+.stat-card.hc   { --algo: var(--hc); }
+.stat-card.sa   { --algo: var(--sa); }
+.stat-card.tabu { --algo: var(--tabu); }
 .stat-card::before {
   content: '';
   position: absolute;
-  inset: 0;
+  top: 0; bottom: 0; right: 0;
   width: 3px;
-  background: var(--text-dim);
+  background: var(--algo, var(--text-dim));
+  box-shadow: 0 0 14px -2px var(--algo, transparent);
+}
+.stat-card::after {
+  content: '';
+  position: absolute;
+  top: 0; right: 0; width: 60%; height: 100%;
+  background: radial-gradient(ellipse 80% 70% at 100% 50%, color-mix(in srgb, var(--algo, transparent) 8%, transparent), transparent 70%);
+  pointer-events: none;
 }
 .stat-card .label {
   font-family: 'JetBrains Mono', monospace;
@@ -334,40 +511,95 @@ button.primary.playing {
   letter-spacing: 1.5px;
   color: var(--text-dim);
   text-transform: uppercase;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
   display: flex;
   justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+}
+.stat-card .label .name-line {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex: 1;
+  min-width: 0;
+}
+.stat-card .label .name-line .algo-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--algo);
+  box-shadow: 0 0 8px var(--algo);
+  flex-shrink: 0;
 }
 .stat-card .label .iter {
+  font-size: 10px;
   color: var(--text-mid);
+  font-weight: 600;
+  background: rgba(255,255,255,0.04);
+  padding: 2px 6px;
+  border-radius: 4px;
 }
 .stat-card .value {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 18px;
-  font-weight: 600;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  line-height: 1.1;
 }
 .stat-card .pos {
   font-family: 'JetBrains Mono', monospace;
   font-size: 10px;
   color: var(--text-dim);
-  margin-top: 2px;
+  margin-top: 3px;
 }
 .stat-card .extra {
-  font-size: 11px;
+  font-size: 10px;
   color: var(--text-mid);
-  margin-top: 4px;
+  margin-top: 8px;
   display: flex;
   justify-content: space-between;
+  font-family: 'JetBrains Mono', monospace;
+}
+.stat-card .progress {
+  height: 3px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 99px;
+  overflow: hidden;
+  margin-top: 9px;
+  position: relative;
+}
+.stat-card .progress-fill {
+  height: 100%;
+  background: var(--algo);
+  border-radius: 99px;
+  transition: width 0.2s ease;
+  box-shadow: 0 0 8px var(--algo);
+}
+.stat-card .spark {
+  margin-top: 8px;
+  height: 28px;
+  width: 100%;
+  display: block;
 }
 
 .info-box {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 12px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.025), rgba(255,255,255,0)), var(--bg-glass);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--border-soft);
+  border-radius: 11px;
+  padding: 14px 14px 13px;
   font-size: 12px;
   color: var(--text-mid);
-  line-height: 1.7;
+  line-height: 1.75;
+  position: relative;
+  overflow: hidden;
+}
+.info-box::before {
+  content: '';
+  position: absolute;
+  top: -1px; left: -1px; right: -1px;
+  height: 2px;
+  background: var(--grad-brand);
+  opacity: 0.6;
 }
 .info-box strong { color: var(--text); }
 .info-box .algo-name {
@@ -381,22 +613,25 @@ button.primary.playing {
   position: absolute;
   bottom: 12px;
   right: 14px;
-  background: rgba(7,9,15,0.85);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 8px 10px;
+  background: rgba(7,9,15,0.75);
+  border: 1px solid var(--border-soft);
+  border-radius: 10px;
+  padding: 10px 12px;
   font-size: 10px;
   font-family: 'JetBrains Mono', monospace;
   z-index: 3;
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 5px;
+  color: var(--text-mid);
+  box-shadow: 0 8px 20px -8px rgba(0,0,0,0.5);
 }
 .legend-row {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 7px;
 }
 .legend-dot {
   width: 8px;
@@ -406,17 +641,28 @@ button.primary.playing {
 
 /* === BADGES === */
 .badge {
-  display: inline-block;
-  padding: 1px 6px;
-  border-radius: 3px;
-  font-size: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 8px;
+  border-radius: 99px;
+  font-size: 9px;
   font-family: 'JetBrains Mono', monospace;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.8px;
+  font-weight: 700;
+  border: 1px solid transparent;
 }
-.badge.live { background: #16a34a33; color: #4ade80; }
-.badge.idle { background: #71717a33; color: #a1a1aa; }
-.badge.done { background: #2563eb33; color: #60a5fa; }
+.badge::before {
+  content: '';
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 6px currentColor;
+}
+.badge.live { background: rgba(34, 197, 94, 0.13); color: #4ade80; border-color: rgba(74, 222, 128, 0.25); }
+.badge.idle { background: rgba(113, 113, 122, 0.13); color: #a1a1aa; border-color: rgba(161, 161, 170, 0.18); }
+.badge.done { background: rgba(251, 191, 36, 0.13); color: #fbbf24; border-color: rgba(251, 191, 36, 0.3); }
 
 /* Custom scrollbar */
 ::-webkit-scrollbar { width: 6px; }
@@ -544,33 +790,39 @@ button.primary.playing {
 /* Function tooltip */
 .tooltip {
   position: absolute;
-  background: rgba(7,9,15,0.95);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 4px 8px;
+  background: rgba(7,9,15,0.92);
+  border: 1px solid rgba(34,227,220,0.3);
+  border-radius: 8px;
+  padding: 6px 10px;
   font-family: 'JetBrains Mono', monospace;
   font-size: 10px;
+  color: var(--text);
   pointer-events: none;
   z-index: 5;
   display: none;
   white-space: nowrap;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 6px 16px -4px rgba(0,0,0,0.5),
+              0 0 0 1px rgba(34,227,220,0.1) inset;
+  letter-spacing: 0.3px;
 }
 
 /* Function meta */
 .fn-meta {
   display: flex;
-  gap: 4px;
+  gap: 5px;
   flex-wrap: wrap;
-  margin-top: 6px;
+  margin-top: 8px;
 }
 .fn-meta span {
   font-family: 'JetBrains Mono', monospace;
   font-size: 9px;
-  padding: 2px 6px;
-  background: var(--bg-elev);
-  border-radius: 3px;
-  color: var(--text-dim);
-  border: 1px solid var(--border);
+  padding: 3px 8px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0));
+  border-radius: 99px;
+  color: var(--text-mid);
+  border: 1px solid var(--border-soft);
+  letter-spacing: 0.2px;
 }
 
 /* Pulse for live indicator */
@@ -585,36 +837,44 @@ button.primary.playing {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 10px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 6px;
+  padding: 10px 12px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.025), rgba(255,255,255,0));
+  border: 1px solid var(--border-soft);
+  border-radius: 9px;
   cursor: pointer;
   font-size: 12px;
   margin-bottom: 8px;
+  transition: border-color 0.15s;
+  color: var(--text-mid);
 }
+.toggle:hover { border-color: var(--border-strong); color: var(--text); }
 .toggle input { display: none; }
 .toggle .sw {
-  width: 28px;
-  height: 16px;
-  background: var(--border);
-  border-radius: 8px;
+  width: 32px;
+  height: 18px;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid var(--border-soft);
+  border-radius: 99px;
   position: relative;
-  transition: 0.2s;
+  transition: background 0.2s, border-color 0.2s;
+  flex-shrink: 0;
 }
 .toggle .sw::after {
   content: '';
   position: absolute;
   width: 12px;
   height: 12px;
-  background: var(--text);
+  background: #cbd5e1;
   border-radius: 50%;
   top: 2px;
   right: 2px;
-  transition: 0.2s;
+  transition: right 0.2s, background 0.2s;
 }
-.toggle input:checked + .sw { background: var(--rs); }
-.toggle input:checked + .sw::after { right: 14px; background: white; }
+.toggle input:checked + .sw {
+  background: linear-gradient(135deg, rgba(34,227,220,0.4), rgba(34,227,220,0.2));
+  border-color: rgba(34,227,220,0.5);
+}
+.toggle input:checked + .sw::after { right: 16px; background: #fff; box-shadow: 0 0 8px rgba(34,227,220,0.5); }
 
 .divider {
   height: 1px;
@@ -627,8 +887,30 @@ button.primary.playing {
 
 <div class="app">
   <header class="header">
-    <h1><span>Visualize Optimization</span> · أربع خوارزميات</h1>
-    <div class="sub">Random Search · Hill Climbing · Simulated Annealing · Tabu Search</div>
+    <div class="header-left">
+      <div class="logo-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="url(#logoGrad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <defs>
+            <linearGradient id="logoGrad" x1="0" y1="0" x2="24" y2="24">
+              <stop offset="0%" stop-color="#22e3dc"/>
+              <stop offset="100%" stop-color="#c084fc"/>
+            </linearGradient>
+          </defs>
+          <path d="M3 17c2-2 4-3 6-2s3 4 5 4 4-3 7-7"/>
+          <circle cx="3" cy="17" r="1.5" fill="#22e3dc" stroke="none"/>
+          <circle cx="21" cy="12" r="1.8" fill="#fbbf24" stroke="none"/>
+        </svg>
+      </div>
+      <h1><span>OptVis</span><span class="divider-dot">·</span>أربع خوارزميات</h1>
+    </div>
+    <div class="header-right">
+      <div class="fn-chip" id="fnChip">
+        <span class="fn-chip-dot"></span>
+        <span id="fnChipName">Rastrigin</span>
+      </div>
+      <div class="sub">RS · HC · SA · Tabu</div>
+    </div>
+    <div class="header-progress" id="headerProgress"></div>
   </header>
 
   <div class="main">
@@ -652,19 +934,34 @@ button.primary.playing {
         <div class="section-title">الخوارزميات</div>
         <div class="radio-group">
           <input type="radio" name="algo" id="a-all" value="all" checked>
-          <label for="a-all" class="all">⚡ All — مقارنة</label>
+          <label for="a-all" class="all">
+            <span class="pill-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span>
+            <span class="pill-text">مقارنة الكل · All</span>
+          </label>
 
           <input type="radio" name="algo" id="a-rs" value="rs">
-          <label for="a-rs" class="rs">Random</label>
+          <label for="a-rs" class="rs">
+            <span class="pill-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="1.4"/><circle cx="18" cy="9" r="1.4"/><circle cx="10" cy="14" r="1.4"/><circle cx="17" cy="18" r="1.4"/><circle cx="7" cy="19" r="1.4"/></svg></span>
+            <span class="pill-text">Random</span>
+          </label>
 
           <input type="radio" name="algo" id="a-hc" value="hc">
-          <label for="a-hc" class="hc">Hill C.</label>
+          <label for="a-hc" class="hc">
+            <span class="pill-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 18 9 12 13 16 21 6"/><polyline points="17 6 21 6 21 10"/></svg></span>
+            <span class="pill-text">Hill C.</span>
+          </label>
 
           <input type="radio" name="algo" id="a-sa" value="sa">
-          <label for="a-sa" class="sa">Sim. Ann.</label>
+          <label for="a-sa" class="sa">
+            <span class="pill-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4v3"/><path d="M14 11v3"/><path d="M14 18v3"/><circle cx="14" cy="14" r="3"/><path d="M5 21h6"/></svg></span>
+            <span class="pill-text">Sim. Ann.</span>
+          </label>
 
           <input type="radio" name="algo" id="a-tabu" value="tabu">
-          <label for="a-tabu" class="tabu">Tabu</label>
+          <label for="a-tabu" class="tabu">
+            <span class="pill-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="6" rx="1"/><rect x="3" y="14" width="11" height="6" rx="1"/><path d="M17 17l4 0"/><path d="M17 14l4 6"/></svg></span>
+            <span class="pill-text">Tabu</span>
+          </label>
         </div>
       </div>
 
@@ -742,7 +1039,7 @@ button.primary.playing {
           <div class="legend-row"><span class="legend-dot" style="background:var(--tabu)"></span> Tabu Search</div>
         </div>
       </div>
-      <div class="view-wrap">
+      <div class="view-wrap" data-view="2d">
         <div class="view-label">2D Contour Map</div>
         <canvas id="view2d"></canvas>
         <div class="tooltip" id="tooltip"></div>
@@ -825,14 +1122,14 @@ const FUNCS = {
 const ALGOS = {
   rs: {
     name: 'Random Search',
-    color: 0x06d4cd,
-    colorHex: '#06d4cd',
+    color: 0x22e3dc,
+    colorHex: '#22e3dc',
     desc: '<strong class="algo-name" style="color:var(--rs)">Random Search</strong><br>يولّد حلولاً عشوائية تماماً في كل تكرار ويحتفظ بالأفضل. <strong>لا ذاكرة، لا تعلم</strong>. ميزته الوحيدة: الاستكشاف الشامل بدون انحياز. عيبه: لا يستفيد من المعلومات السابقة.'
   },
   hc: {
     name: 'Hill Climbing',
-    color: 0x10b981,
-    colorHex: '#10b981',
+    color: 0x34d399,
+    colorHex: '#34d399',
     desc: '<strong class="algo-name" style="color:var(--hc)">Hill Climbing</strong><br>يفحص الجيران ويتحرك للأفضل منهم فقط. <strong>سريع جداً</strong>، لكنه يعلق في أول قمة محلية يصلها. مثل أعمى يصعد دائماً للأعلى — قد ينتهي في تل صغير لا في الجبل.'
   },
   sa: {
@@ -885,6 +1182,7 @@ function makeOptimizer(algo, fn, params) {
     best: null,
     iter: 0,
     done: false,
+    history: [],
   };
 
   if (algo === 'rs') {
@@ -896,6 +1194,7 @@ function makeOptimizer(algo, fn, params) {
     o.current = {x:sx, y:sy, z:sz};
     o.best = {...o.current};
     o.path.push({x:sx, y:sy, z:sz, kind:'start'});
+    o.history.push(sz);
     if (algo === 'sa') o.T = params.T0;
     if (algo === 'tabu') o.tabu = [];
   }
@@ -909,6 +1208,7 @@ function gridCell(x, y) {
 function stepOptimizer(o) {
   if (o.done) return;
   const fn = o.fn, p = o.params, b = fn.bounds;
+  const prevBestZ = o.best ? o.best.z : Infinity;
 
   if (o.algo === 'rs') {
     const x = randBetween(b[0], b[1]);
@@ -994,6 +1294,7 @@ function stepOptimizer(o) {
   }
 
   if (o.iter >= p.maxIter) o.done = true;
+  o.history.push(o.best ? o.best.z : prevBestZ);
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1341,32 +1642,86 @@ function drawArrow(x1,y1,x2,y2,color) {
 // ═══════════════════════════════════════════════════════════════
 // STATS
 // ═══════════════════════════════════════════════════════════════
+function sparklinePath(history, width, height) {
+  if (!history || history.length < 2) return '';
+  const n = history.length;
+  let lo = Infinity, hi = -Infinity;
+  for (const v of history) { if (v < lo) lo = v; if (v > hi) hi = v; }
+  const range = hi - lo || 1;
+  let d = '';
+  for (let i = 0; i < n; i++) {
+    const x = (i / (n - 1)) * (width - 2) + 1;
+    const y = height - 2 - ((history[i] - lo) / range) * (height - 4);
+    d += (i === 0 ? 'M' : 'L') + x.toFixed(1) + ',' + y.toFixed(1) + ' ';
+  }
+  return d;
+}
+
 function updateStats() {
   const container = document.getElementById('stats');
   const list = state.algo==='all' ? ['rs','hc','sa','tabu'] : [state.algo];
   let html = '';
   for (const a of list) {
     const o = state.optimizers[a];
+    const algoName = ALGOS[a].name;
     if (!o || !o.best) {
-      html += `<div class="stat-card ${a}"><div class="label"><span style="color:var(--${a})">${ALGOS[a].name}</span><span class="badge idle">جاهز</span></div><div class="value" style="color:var(--text-dim)">—</div></div>`;
+      html += `<div class="stat-card ${a}">
+        <div class="label">
+          <span class="name-line"><span class="algo-dot"></span><span style="color:var(--${a})">${algoName}</span></span>
+          <span class="badge idle">جاهز</span>
+        </div>
+        <div class="value" style="color:var(--text-dim)">—</div>
+        <div class="pos">في انتظار التشغيل</div>
+      </div>`;
       continue;
     }
     const status = o.done ? `<span class="badge done">انتهى</span>` :
                    state.playing ? `<span class="badge live pulse">يعمل</span>` :
                    `<span class="badge idle">متوقف</span>`;
     const dist = Math.sqrt((o.best.x-o.fn.global.x)**2+(o.best.y-o.fn.global.y)**2);
-    let extra = `<div class="extra"><span>الخطوات: ${o.path.length}</span><span>المسافة: ${dist.toFixed(2)}</span></div>`;
-    if (a==='sa' && o.T!==undefined) extra=`<div class="extra"><span>T = ${o.T.toFixed(3)}</span><span>المسافة: ${dist.toFixed(2)}</span></div>`;
-    if (a==='tabu' && o.tabu) extra=`<div class="extra"><span>محظور: ${o.tabu.length}</span><span>المسافة: ${dist.toFixed(2)}</span></div>`;
+    let extraRow = `<span>الخطوات · ${o.path.length}</span><span>Δ ${dist.toFixed(2)}</span>`;
+    if (a==='sa' && o.T!==undefined) extraRow = `<span>T · ${o.T.toFixed(3)}</span><span>Δ ${dist.toFixed(2)}</span>`;
+    if (a==='tabu' && o.tabu) extraRow = `<span>محظور · ${o.tabu.length}</span><span>Δ ${dist.toFixed(2)}</span>`;
+
+    const pct = Math.min(100, (o.iter / o.params.maxIter) * 100);
+    const sparkW = 220, sparkH = 28;
+    const d = sparklinePath(o.history, sparkW, sparkH);
+    const color = ALGOS[a].colorHex;
+    const sparkSvg = d ? `<svg class="spark" viewBox="0 0 ${sparkW} ${sparkH}" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="g-${a}" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="${color}" stop-opacity="0.35"/>
+          <stop offset="100%" stop-color="${color}" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <path d="${d} L ${sparkW-1},${sparkH} L 1,${sparkH} Z" fill="url(#g-${a})"/>
+      <path d="${d}" fill="none" stroke="${color}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>` : '';
+
     html += `<div class="stat-card ${a}">
-      <div class="label"><span style="color:var(--${a})">${ALGOS[a].name}</span>
-      <span>${status}<span class="iter" style="margin-right:6px">${o.iter}/${o.params.maxIter}</span></span></div>
+      <div class="label">
+        <span class="name-line"><span class="algo-dot"></span><span style="color:var(--${a})">${algoName}</span></span>
+        <span style="display:flex;align-items:center;gap:6px">${status}<span class="iter">${o.iter}/${o.params.maxIter}</span></span>
+      </div>
       <div class="value" style="color:var(--${a})">${o.best.z.toFixed(4)}</div>
-      <div class="pos">x=${o.best.x.toFixed(2)}, y=${o.best.y.toFixed(2)}</div>
-      ${extra}
+      <div class="pos">x ${o.best.x.toFixed(2)} · y ${o.best.y.toFixed(2)}</div>
+      ${sparkSvg}
+      <div class="progress"><div class="progress-fill" style="width:${pct}%"></div></div>
+      <div class="extra">${extraRow}</div>
     </div>`;
   }
   container.innerHTML = html;
+
+  // header progress bar = avg progress across active optimizers
+  const progBar = document.getElementById('headerProgress');
+  if (progBar) {
+    const opts = list.map(a => state.optimizers[a]).filter(Boolean);
+    const avgPct = opts.length
+      ? opts.reduce((s, o) => s + Math.min(1, o.iter / o.params.maxIter), 0) / opts.length
+      : 0;
+    progBar.style.transform = `scaleX(${avgPct})`;
+    progBar.style.opacity = avgPct > 0 && avgPct < 1 ? '0.8' : avgPct >= 1 ? '0.3' : '0';
+  }
 }
 
 function updateAlgoInfo() {
@@ -1464,17 +1819,37 @@ function animate(t) {
 // ═══════════════════════════════════════════════════════════════
 // UI WIRING
 // ═══════════════════════════════════════════════════════════════
+const SLIDER_COLORS = {
+  maxIter: 'var(--rs)',
+  speed:   'var(--rs)',
+  x0:      'var(--gold)',
+  y0:      'var(--gold)',
+  step:    'var(--hc)',
+  T0:      'var(--sa)',
+  cool:    'var(--sa)',
+  tenure:  'var(--tabu)',
+};
+
+function updateSliderFill(el) {
+  const min = parseFloat(el.min), max = parseFloat(el.max), val = parseFloat(el.value);
+  const pct = ((val - min) / (max - min)) * 100;
+  el.style.setProperty('--track-pct', pct + '%');
+}
+
 function bindRange(id, stateKey, fmt, onChange) {
   const el = document.getElementById(id);
   const capId = 'v' + id.charAt(0).toUpperCase() + id.slice(1);
   const lab = document.getElementById(capId);
+  if (SLIDER_COLORS[id]) el.style.setProperty('--track-fill', SLIDER_COLORS[id]);
   el.addEventListener('input', () => {
     state[stateKey] = parseFloat(el.value);
     if (lab) lab.textContent = fmt ? fmt(state[stateKey]) : state[stateKey];
+    updateSliderFill(el);
     if (onChange) onChange();
   });
   state[stateKey] = parseFloat(el.value);
   if (lab) lab.textContent = fmt ? fmt(state[stateKey]) : state[stateKey];
+  updateSliderFill(el);
 }
 
 bindRange('maxIter','maxIter');
@@ -1486,11 +1861,18 @@ bindRange('T0','T0', v => v.toFixed(1));
 bindRange('cool','cool', v => v.toFixed(2));
 bindRange('tenure','tenure');
 
+function updateFnChip() {
+  const fn = FUNCS[state.func];
+  const el = document.getElementById('fnChipName');
+  if (el) el.textContent = fn.name.replace(/\s*\(.*?\)\s*/, '');
+}
+
 document.getElementById('funcSelect').addEventListener('change', e => {
   state.func = e.target.value;
   rebuildSurface();
   rebuildHeatmap();
   updateFnMeta();
+  updateFnChip();
   reset();
 });
 
@@ -1592,6 +1974,7 @@ view2d.addEventListener('touchend', e => {
 // ═══════════════════════════════════════════════════════════════
 rebuildSurface();
 updateFnMeta();
+updateFnChip();
 resizeAll();
 buildOptimizers();
 updateAlgoInfo();
