@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Visualize Optimization — أربع خوارزميات</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -38,7 +38,7 @@
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { height: 100%; }
+html, body { height: 100%; -webkit-text-size-adjust: 100%; }
 body {
   font-family: 'Cairo', 'Outfit', system-ui, sans-serif;
   background: var(--bg-deep);
@@ -46,6 +46,7 @@ body {
   overflow: hidden;
   font-size: 14px;
   line-height: 1.5;
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* Background pattern */
@@ -64,6 +65,7 @@ body::before {
   display: grid;
   grid-template-rows: 56px 1fr;
   height: 100vh;
+  height: 100dvh;
 }
 
 .header {
@@ -422,19 +424,121 @@ button.primary.playing {
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--border-strong); }
 
-/* Mobile responsive */
+/* === Mobile menu toggle button (hidden on desktop) === */
+.mobile-tab-bar { display: none; }
+
+/* Tablet (≤ 1100px) — two columns become one, viz on top */
 @media (max-width: 1100px) {
+  body { overflow: auto; }
+  .app {
+    height: auto;
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
   .main {
     grid-template-columns: 1fr;
-    grid-template-rows: auto 1fr auto;
-    overflow-y: auto;
-  }
-  .panel {
-    max-height: 280px;
+    grid-template-rows: auto auto auto;
+    overflow: visible;
   }
   .viz {
-    min-height: 60vh;
+    grid-row: 1;
+    height: 70vh;
+    height: 70dvh;
+    min-height: 480px;
   }
+  .panel { padding: 14px; max-height: none; overflow: visible; }
+}
+
+/* Phone (≤ 720px) — single column, simplified header, larger touch targets */
+@media (max-width: 720px) {
+  body { font-size: 13px; }
+
+  .header {
+    padding: 0 12px;
+    height: 52px;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 2px;
+  }
+  .app { grid-template-rows: 52px 1fr; }
+  .header h1 { font-size: 14px; letter-spacing: 0; }
+  .header .sub { font-size: 10px; margin-right: 0; display: none; }
+
+  .viz {
+    grid-template-rows: 1fr 1fr;
+    height: auto;
+    min-height: 0;
+  }
+  .view-wrap { min-height: 320px; }
+  .view-label {
+    font-size: 9px;
+    padding: 3px 7px;
+    top: 8px;
+    right: 8px;
+  }
+  .legend {
+    bottom: 8px;
+    right: 8px;
+    padding: 6px 8px;
+    font-size: 9px;
+    gap: 3px;
+  }
+  .legend-dot { width: 6px; height: 6px; }
+
+  .panel { padding: 12px; }
+  .section { margin-bottom: 16px; }
+  .section-title { font-size: 9px; letter-spacing: 1.5px; }
+
+  /* Larger touch targets */
+  select { padding: 11px 12px; font-size: 14px; }
+  button { padding: 12px 10px; font-size: 13px; min-height: 44px; }
+  input[type=range] { height: 6px; }
+  input[type=range]::-webkit-slider-thumb { width: 20px; height: 20px; }
+  input[type=range]::-moz-range-thumb { width: 20px; height: 20px; }
+  .radio-group { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .radio-group label { padding: 12px 8px; min-height: 44px; font-size: 13px; }
+  .toggle { padding: 12px 10px; min-height: 44px; }
+  .toggle .sw { width: 36px; height: 20px; }
+  .toggle .sw::after { width: 14px; height: 14px; }
+  .toggle input:checked + .sw::after { right: 18px; }
+
+  .field { margin-bottom: 14px; }
+  .field-row { font-size: 13px; }
+  .field-row .val { font-size: 11px; padding: 3px 8px; }
+
+  .stat-card { padding: 11px; }
+  .stat-card .value { font-size: 16px; }
+
+  .btn-row {
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    position: sticky;
+    bottom: 0;
+    background: var(--bg);
+    padding-top: 10px;
+    margin-top: 4px;
+    z-index: 5;
+  }
+}
+
+/* Very small phones */
+@media (max-width: 380px) {
+  .header h1 { font-size: 12px; }
+  .view-wrap { min-height: 260px; }
+  .radio-group { grid-template-columns: 1fr; }
+  .radio-group label.all { grid-column: span 1; }
+  .legend { display: none; }
+}
+
+/* Landscape phones — keep things compact */
+@media (max-width: 900px) and (orientation: landscape) and (max-height: 500px) {
+  .header { height: 44px; }
+  .app { grid-template-rows: 44px 1fr; }
+  .header h1 { font-size: 13px; }
+  .header .sub { display: none; }
+  .viz { height: auto; }
+  .view-wrap { min-height: 260px; }
 }
 
 /* Function tooltip */
@@ -1288,19 +1392,22 @@ function updateFnMeta() {
 // ═══════════════════════════════════════════════════════════════
 function resizeAll() {
   const r3 = view3dEl.getBoundingClientRect();
-  renderer.setSize(r3.width, r3.height);
-  camera.aspect = r3.width / r3.height;
-  camera.updateProjectionMatrix();
+  if (r3.width > 0 && r3.height > 0) {
+    renderer.setSize(r3.width, r3.height);
+    camera.aspect = r3.width / r3.height;
+    camera.updateProjectionMatrix();
+  }
 
   const r2 = view2d.parentElement.getBoundingClientRect();
-  const dpr = window.devicePixelRatio;
-  view2d.width = r2.width * dpr;
-  view2d.height = r2.height * dpr;
-  view2d.style.width = r2.width + 'px';
-  view2d.style.height = r2.height + 'px';
-  ctx.scale(dpr, dpr);
-  rebuildHeatmap();
-  draw2D();
+  if (r2.width > 0 && r2.height > 0) {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    view2d.width = Math.round(r2.width * dpr);
+    view2d.height = Math.round(r2.height * dpr);
+    view2d.style.width = r2.width + 'px';
+    view2d.style.height = r2.height + 'px';
+    rebuildHeatmap();
+    draw2D();
+  }
 }
 
 function buildOptimizers() {
@@ -1417,7 +1524,13 @@ document.getElementById('stepBtn').addEventListener('click', () => {
 
 document.getElementById('resetBtn').addEventListener('click', reset);
 
-window.addEventListener('resize', resizeAll);
+let resizeTimer = null;
+function scheduleResize() {
+  if (resizeTimer) clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => { resizeAll(); resizeTimer = null; }, 80);
+}
+window.addEventListener('resize', scheduleResize);
+window.addEventListener('orientationchange', () => setTimeout(resizeAll, 200));
 
 // 2D tooltip
 const tip = document.getElementById('tooltip');
@@ -1435,10 +1548,10 @@ view2d.addEventListener('mousemove', e => {
 });
 view2d.addEventListener('mouseleave', () => tip.style.display='none');
 
-view2d.addEventListener('click', e => {
+function setStartFromPoint(clientX, clientY) {
   const rect = view2d.getBoundingClientRect();
-  const px = (e.clientX - rect.left) / rect.width;
-  const py = (e.clientY - rect.top) / rect.height;
+  const px = (clientX - rect.left) / rect.width;
+  const py = (clientY - rect.top) / rect.height;
   const fn = FUNCS[state.func];
   const x = fn.bounds[0] + px*(fn.bounds[1]-fn.bounds[0]);
   const y = fn.bounds[2] + (1-py)*(fn.bounds[3]-fn.bounds[2]);
@@ -1449,6 +1562,29 @@ view2d.addEventListener('click', e => {
   document.getElementById('vX0').textContent = state.x0;
   document.getElementById('vY0').textContent = state.y0;
   reset();
+}
+view2d.addEventListener('click', e => setStartFromPoint(e.clientX, e.clientY));
+
+// Touch support: tap to set start point (and brief tooltip)
+view2d.addEventListener('touchstart', e => {
+  if (e.touches.length !== 1) return;
+  const t = e.touches[0];
+  const rect = view2d.getBoundingClientRect();
+  const px = (t.clientX - rect.left) / rect.width;
+  const py = (t.clientY - rect.top) / rect.height;
+  const fn = FUNCS[state.func];
+  const x = fn.bounds[0] + px*(fn.bounds[1]-fn.bounds[0]);
+  const y = fn.bounds[2] + (1-py)*(fn.bounds[3]-fn.bounds[2]);
+  tip.style.display = 'block';
+  tip.style.left = (t.clientX - rect.left + 12) + 'px';
+  tip.style.top = (t.clientY - rect.top - 28) + 'px';
+  tip.textContent = `x=${x.toFixed(2)}  y=${y.toFixed(2)}  f=${fn.f(x,y).toFixed(3)}`;
+}, { passive: true });
+view2d.addEventListener('touchend', e => {
+  if (e.changedTouches.length !== 1) return;
+  const t = e.changedTouches[0];
+  setStartFromPoint(t.clientX, t.clientY);
+  setTimeout(() => tip.style.display = 'none', 800);
 });
 
 // ═══════════════════════════════════════════════════════════════
