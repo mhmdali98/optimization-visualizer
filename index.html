@@ -285,6 +285,109 @@ body::after {
 }
 .view-wrap[data-view="2d"] .view-label::before { background: var(--tabu); box-shadow: 0 0 6px var(--tabu); }
 
+/* Floating view controls (top-left of each view) */
+.view-controls {
+  position: absolute;
+  top: 12px;
+  left: 14px;
+  display: flex;
+  gap: 3px;
+  z-index: 3;
+  background: rgba(7,9,15,0.7);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  padding: 4px;
+  border: 1px solid var(--border-soft);
+  border-radius: 10px;
+  box-shadow: 0 8px 20px -8px rgba(0,0,0,0.5);
+}
+.view-controls button {
+  width: 28px; height: 28px;
+  padding: 0;
+  border-radius: 7px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-mid);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  min-height: unset;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  font-size: 0;
+}
+.view-controls button svg { width: 14px; height: 14px; display: block; }
+.view-controls button:hover {
+  background: rgba(255,255,255,0.06);
+  color: var(--text);
+}
+.view-controls button.active {
+  background: rgba(34,227,220,0.16);
+  color: var(--rs);
+  border-color: rgba(34,227,220,0.35);
+  box-shadow: 0 0 8px -2px rgba(34,227,220,0.4);
+}
+.view-controls .sep {
+  width: 1px;
+  background: var(--border-soft);
+  margin: 4px 2px;
+}
+
+/* Convergence chart */
+.conv-chart {
+  margin-top: 12px;
+  padding: 12px 14px 8px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.025), rgba(255,255,255,0)), var(--bg-glass);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--border-soft);
+  border-radius: 11px;
+}
+.conv-head {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 8px;
+}
+.conv-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  display: flex; align-items: center; gap: 7px;
+}
+.conv-title::before {
+  content: '';
+  width: 4px; height: 4px; border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 6px var(--gold);
+}
+.conv-scale {
+  display: flex; gap: 2px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border-soft);
+  border-radius: 6px;
+  padding: 2px;
+}
+.conv-scale button {
+  padding: 2px 8px;
+  font-size: 9px;
+  font-family: 'JetBrains Mono', monospace;
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  border-radius: 4px;
+  min-height: unset;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+.conv-scale button.active {
+  background: rgba(34,227,220,0.15);
+  color: var(--rs);
+}
+#convChart {
+  display: block;
+  width: 100%;
+  height: 160px;
+}
+
 #view3d, #view2d {
   width: 100%;
   height: 100%;
@@ -1061,6 +1164,30 @@ button.primary.playing {
     <section class="viz">
       <div class="view-wrap">
         <div class="view-label">3D Landscape</div>
+        <div class="view-controls" id="view3dControls">
+          <button data-cmd="reset3d" title="Reset camera">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 4 3 10 9 10"/></svg>
+          </button>
+          <button data-cmd="top3d" title="Top-down view">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="1"/><circle cx="12" cy="12" r="2.5" fill="currentColor"/></svg>
+          </button>
+          <button data-cmd="autorot" title="Auto rotate">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15.5-6.3M21 12a9 9 0 0 1-15.5 6.3"/><polyline points="18 3 21 6 18 9"/><polyline points="6 21 3 18 6 15"/></svg>
+          </button>
+          <span class="sep"></span>
+          <button data-cmd="surface" class="active" title="Toggle surface">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l4-6 4 4 4-7 6 9"/><path d="M3 21l18 0"/></svg>
+          </button>
+          <button data-cmd="wire" class="active" title="Toggle wireframe">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M3 12h18M3 18h18M6 3v18M12 3v18M18 3v18"/></svg>
+          </button>
+          <button data-cmd="marker3d" class="active" title="Toggle global min marker">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.5" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="8"/></svg>
+          </button>
+          <button data-cmd="paths3d" class="active" title="Toggle paths">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18 C 7 18, 7 6, 12 6 S 17 18, 20 18"/></svg>
+          </button>
+        </div>
         <div id="view3d"></div>
         <div class="legend">
           <div class="legend-row"><span class="legend-dot" style="background:var(--gold);box-shadow:0 0 8px var(--gold)"></span><span data-i18n="globalMin">الحد الأدنى العالمي</span></div>
@@ -1072,6 +1199,24 @@ button.primary.playing {
       </div>
       <div class="view-wrap" data-view="2d">
         <div class="view-label">2D Contour Map</div>
+        <div class="view-controls" id="view2dControls">
+          <button data-cmd="heatmap" class="active" title="Toggle heatmap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="1.5"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
+          </button>
+          <button data-cmd="contours" class="active" title="Toggle contour lines">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><ellipse cx="12" cy="12" rx="9" ry="6"/><ellipse cx="12" cy="12" rx="6" ry="4"/><ellipse cx="12" cy="12" rx="3" ry="2"/></svg>
+          </button>
+          <button data-cmd="grid" class="active" title="Toggle grid">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 3h18v18H3zM3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
+          </button>
+          <span class="sep"></span>
+          <button data-cmd="marker2d" class="active" title="Toggle global min marker">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.5" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="8"/></svg>
+          </button>
+          <button data-cmd="paths2d" class="active" title="Toggle paths">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18 C 7 18, 7 6, 12 6 S 17 18, 20 18"/></svg>
+          </button>
+        </div>
         <canvas id="view2d"></canvas>
         <div class="tooltip" id="tooltip"></div>
       </div>
@@ -1082,6 +1227,16 @@ button.primary.playing {
       <div class="section">
         <div class="section-title" data-i18n="statsSection">النتائج الحالية</div>
         <div id="stats"></div>
+        <div class="conv-chart">
+          <div class="conv-head">
+            <div class="conv-title" data-i18n="convTitle">منحنى التقارب</div>
+            <div class="conv-scale" id="convScale">
+              <button data-scale="lin" class="active">LIN</button>
+              <button data-scale="log">LOG</button>
+            </div>
+          </div>
+          <canvas id="convChart"></canvas>
+        </div>
       </div>
 
       <div class="section">
@@ -1113,6 +1268,7 @@ const TRANS = {
     showRS:'إظهار كل عينات RS (شفاف)',
     play:'▶ تشغيل', pause:'⏸ إيقاف', stepBtn:'⏭ خطوة', reset:'↻ إعادة',
     statsSection:'النتائج الحالية', algoInfoSection:'شرح الخوارزمية النشطة',
+    convTitle:'منحنى التقارب', noConvData:'سيظهر المنحنى بعد بدء التشغيل',
     idle:'جاهز', live:'يعمل', done:'انتهى', stopped:'متوقف',
     waiting:'في انتظار التشغيل', steps:'الخطوات', dist:'Δ', tabuList:'محظور',
     algoAllPill:'مقارنة الكل · All', algoRsName:'Random', algoHcName:'Hill C.',
@@ -1150,6 +1306,7 @@ const TRANS = {
     showRS:'Show All RS Samples (faded)',
     play:'▶ Run', pause:'⏸ Pause', stepBtn:'⏭ Step', reset:'↻ Reset',
     statsSection:'Current Results', algoInfoSection:'Algorithm Description',
+    convTitle:'Convergence Curve', noConvData:'Curve appears after running',
     idle:'Ready', live:'Running', done:'Done', stopped:'Paused',
     waiting:'Waiting to run', steps:'Steps', dist:'Δ', tabuList:'Tabu',
     algoAllPill:'Compare All', algoRsName:'Random', algoHcName:'Hill C.',
@@ -1187,6 +1344,7 @@ const TRANS = {
     showRS:'نمایش همه نمونه‌های RS',
     play:'▶ اجرا', pause:'⏸ توقف', stepBtn:'⏭ گام', reset:'↻ بازنشانی',
     statsSection:'نتایج جاری', algoInfoSection:'توضیح الگوریتم',
+    convTitle:'منحنی همگرایی', noConvData:'منحنی پس از اجرا ظاهر می‌شود',
     idle:'آماده', live:'در حال اجرا', done:'تمام', stopped:'متوقف',
     waiting:'در انتظار اجرا', steps:'گام‌ها', dist:'Δ', tabuList:'ممنوع',
     algoAllPill:'مقایسه همه', algoRsName:'تصادفی', algoHcName:'تپه‌نوردی',
@@ -1353,6 +1511,21 @@ const state = {
   playing: false,
   optimizers: {},
   lastStep: 0,
+};
+
+// View toggles for both 3D and 2D
+const view = {
+  surface: true,
+  wire: true,
+  marker3d: true,
+  paths3d: true,
+  autorot: false,
+  heatmap: true,
+  contours: true,
+  grid: true,
+  marker2d: true,
+  paths2d: true,
+  convScale: 'lin',
 };
 
 // ═══════════════════════════════════════════════════════════════
@@ -1730,26 +1903,38 @@ function w2c(x, y) {
 function draw2D() {
   const W = view2d.width, H = view2d.height;
   ctx.clearRect(0, 0, W, H);
-  if (heatmapCanvas) ctx.drawImage(heatmapCanvas, 0, 0, W, H);
+  if (view.heatmap && heatmapCanvas) ctx.drawImage(heatmapCanvas, 0, 0, W, H);
+  if (!view.heatmap) {
+    ctx.fillStyle = '#0a1220';
+    ctx.fillRect(0, 0, W, H);
+  }
 
-  ctx.strokeStyle = 'rgba(255,255,255,0.06)';
-  ctx.lineWidth = 1;
-  for (let i = 1; i < 10; i++) {
-    const x = (i/10)*W, y = (i/10)*H;
-    ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke();
+  if (view.contours) drawContours();
+
+  if (view.grid) {
+    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+    ctx.lineWidth = 1;
+    for (let i = 1; i < 10; i++) {
+      const x = (i/10)*W, y = (i/10)*H;
+      ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke();
+    }
   }
 
   const fn = FUNCS[state.func];
-  const [gx, gy] = w2c(fn.global.x, fn.global.y);
-  ctx.save();
-  ctx.shadowColor = '#fbbf24'; ctx.shadowBlur = 18;
-  ctx.fillStyle = '#fbbf24';
-  ctx.beginPath(); ctx.arc(gx, gy, 5, 0, 2*Math.PI); ctx.fill();
-  ctx.shadowBlur = 0;
-  ctx.strokeStyle = 'rgba(251,191,36,0.5)'; ctx.lineWidth = 1.5;
-  ctx.beginPath(); ctx.arc(gx, gy, 11, 0, 2*Math.PI); ctx.stroke();
-  ctx.restore();
+  if (view.marker2d) {
+    const [gx, gy] = w2c(fn.global.x, fn.global.y);
+    ctx.save();
+    ctx.shadowColor = '#fbbf24'; ctx.shadowBlur = 18;
+    ctx.fillStyle = '#fbbf24';
+    ctx.beginPath(); ctx.arc(gx, gy, 5, 0, 2*Math.PI); ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.strokeStyle = 'rgba(251,191,36,0.5)'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(gx, gy, 11, 0, 2*Math.PI); ctx.stroke();
+    ctx.restore();
+  }
+
+  if (!view.paths2d) return;
 
   const activeList = state.algo === 'all' ? ['rs','hc','sa','tabu'] : [state.algo];
   for (const a of activeList) {
@@ -1912,6 +2097,8 @@ function updateStats() {
     progBar.style.transform = `scaleX(${avgPct})`;
     progBar.style.opacity = avgPct > 0 && avgPct < 1 ? '0.8' : avgPct >= 1 ? '0.3' : '0';
   }
+
+  if (typeof drawConvChart === 'function') drawConvChart();
 }
 
 function updateAlgoInfo() {
@@ -1952,6 +2139,7 @@ function resizeAll() {
     rebuildHeatmap();
     draw2D();
   }
+  if (typeof drawConvChart === 'function') drawConvChart();
 }
 
 function buildOptimizers() {
@@ -2059,6 +2247,7 @@ function updateFnChip() {
 document.getElementById('funcSelect').addEventListener('change', e => {
   state.func = e.target.value;
   rebuildSurface();
+  applyView();
   rebuildHeatmap();
   updateFnMeta();
   updateFnChip();
@@ -2109,6 +2298,202 @@ function scheduleResize() {
 }
 window.addEventListener('resize', scheduleResize);
 window.addEventListener('orientationchange', () => setTimeout(resizeAll, 200));
+
+// ═══════════════════════════════════════════════════════════════
+// VIEW CONTROLS — toggles, camera presets, contours, convergence
+// ═══════════════════════════════════════════════════════════════
+function applyView() {
+  if (surfaceMesh) surfaceMesh.visible = view.surface;
+  if (surfaceMesh && surfaceMesh.userData.wire) surfaceMesh.userData.wire.visible = view.wire;
+  if (globalMarker) globalMarker.visible = view.marker3d;
+  Object.values(algoGroups).forEach(g => g.visible = view.paths3d);
+  controls.autoRotate = view.autorot;
+  controls.autoRotateSpeed = 0.9;
+  draw2D();
+  drawConvChart();
+}
+
+function resetCamera() {
+  camera.position.set(8, 7, 8);
+  controls.target.set(0, 0, 0);
+  controls.update();
+}
+function topDownCamera() {
+  camera.position.set(0.001, 13, 0.001);
+  controls.target.set(0, 0, 0);
+  controls.update();
+}
+
+document.getElementById('view3dControls').addEventListener('click', e => {
+  const btn = e.target.closest('button');
+  if (!btn) return;
+  const cmd = btn.dataset.cmd;
+  if (cmd === 'reset3d') return resetCamera();
+  if (cmd === 'top3d')   return topDownCamera();
+  if (cmd === 'autorot') {
+    view.autorot = !view.autorot;
+    btn.classList.toggle('active', view.autorot);
+    applyView(); return;
+  }
+  if (view[cmd] === undefined) return;
+  view[cmd] = !view[cmd];
+  btn.classList.toggle('active', view[cmd]);
+  applyView();
+});
+
+document.getElementById('view2dControls').addEventListener('click', e => {
+  const btn = e.target.closest('button');
+  if (!btn) return;
+  const cmd = btn.dataset.cmd;
+  if (view[cmd] === undefined) return;
+  view[cmd] = !view[cmd];
+  btn.classList.toggle('active', view[cmd]);
+  draw2D();
+});
+
+document.getElementById('convScale').addEventListener('click', e => {
+  const btn = e.target.closest('button');
+  if (!btn) return;
+  view.convScale = btn.dataset.scale;
+  document.querySelectorAll('#convScale button').forEach(b => b.classList.toggle('active', b === btn));
+  drawConvChart();
+});
+
+// ═══════════════════════════════════════════════════════════════
+// CONTOURS — iso-level lines on the 2D heatmap
+// ═══════════════════════════════════════════════════════════════
+function drawContours() {
+  const fn = FUNCS[state.func];
+  const W = view2d.width, H = view2d.height;
+  const N = 80;
+  const grid = new Float32Array(N*N);
+  let lo = Infinity, hi = -Infinity;
+  for (let j = 0; j < N; j++) {
+    for (let i = 0; i < N; i++) {
+      const x = fn.bounds[0] + (i/(N-1)) * (fn.bounds[1]-fn.bounds[0]);
+      const y = fn.bounds[2] + ((N-1-j)/(N-1)) * (fn.bounds[3]-fn.bounds[2]);
+      const z = fn.f(x, y);
+      grid[j*N+i] = z;
+      if (z < lo) lo = z;
+      if (z > hi) hi = z;
+    }
+  }
+  const levels = 11;
+  const cellW = W / (N-1), cellH = H / (N-1);
+  ctx.strokeStyle = 'rgba(255,255,255,0.22)';
+  ctx.lineWidth = 0.7;
+  ctx.beginPath();
+  for (let l = 1; l <= levels; l++) {
+    const iso = lo + (l/(levels+1)) * (hi - lo);
+    for (let j = 0; j < N-1; j++) {
+      for (let i = 0; i < N-1; i++) {
+        const v00 = grid[j*N+i], v10 = grid[j*N+i+1];
+        const v01 = grid[(j+1)*N+i], v11 = grid[(j+1)*N+i+1];
+        const x0 = i*cellW, y0 = j*cellH;
+        const x1 = x0+cellW, y1 = y0+cellH;
+        const pts = [];
+        if ((v00-iso)*(v10-iso) < 0) { const t=(iso-v00)/(v10-v00); pts.push(x0+t*cellW, y0); }
+        if ((v10-iso)*(v11-iso) < 0) { const t=(iso-v10)/(v11-v10); pts.push(x1, y0+t*cellH); }
+        if ((v01-iso)*(v11-iso) < 0) { const t=(iso-v01)/(v11-v01); pts.push(x0+t*cellW, y1); }
+        if ((v00-iso)*(v01-iso) < 0) { const t=(iso-v00)/(v01-v00); pts.push(x0, y0+t*cellH); }
+        if (pts.length >= 4) {
+          ctx.moveTo(pts[0], pts[1]);
+          ctx.lineTo(pts[2], pts[3]);
+          if (pts.length === 8) {
+            ctx.moveTo(pts[4], pts[5]);
+            ctx.lineTo(pts[6], pts[7]);
+          }
+        }
+      }
+    }
+  }
+  ctx.stroke();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CONVERGENCE CHART
+// ═══════════════════════════════════════════════════════════════
+function drawConvChart() {
+  const cv = document.getElementById('convChart');
+  if (!cv) return;
+  const ctx2 = cv.getContext('2d');
+  const r = cv.getBoundingClientRect();
+  if (r.width === 0) return;
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  cv.width = Math.round(r.width * dpr);
+  cv.height = Math.round(r.height * dpr);
+  ctx2.scale(dpr, dpr);
+
+  const W = r.width, H = r.height;
+  ctx2.clearRect(0, 0, W, H);
+
+  const algos = state.algo === 'all' ? ['rs','hc','sa','tabu'] : [state.algo];
+  const data = algos.map(a => ({a, h: (state.optimizers[a]||{}).history || []}));
+  let maxLen = 0, lo = Infinity, hi = -Infinity;
+  for (const d of data) {
+    if (d.h.length > maxLen) maxLen = d.h.length;
+    for (const v of d.h) { if (v < lo) lo = v; if (v > hi) hi = v; }
+  }
+  if (maxLen < 2) {
+    ctx2.fillStyle = 'rgba(148,163,184,0.45)';
+    ctx2.font = '11px JetBrains Mono';
+    ctx2.textAlign = 'center';
+    ctx2.fillText(t('noConvData'), W/2, H/2);
+    return;
+  }
+
+  const padL = 36, padR = 10, padT = 10, padB = 22;
+  const plotW = W - padL - padR, plotH = H - padT - padB;
+  const xMap = i => padL + (i / (maxLen - 1)) * plotW;
+
+  const isLog = view.convScale === 'log';
+  const shift = isLog && lo <= 0 ? (-lo + 1) : 0;
+  const ln = v => Math.log(v + shift + 1e-9);
+  const lLo = isLog ? ln(lo) : lo;
+  const lHi = isLog ? ln(hi) : hi;
+  const lRange = (lHi - lLo) || 1;
+  const yMap = v => padT + plotH - ((isLog ? ln(v) : v) - lLo) / lRange * plotH;
+
+  // Grid
+  ctx2.strokeStyle = 'rgba(255,255,255,0.05)';
+  ctx2.lineWidth = 1;
+  for (let g = 0; g <= 4; g++) {
+    const y = padT + (g/4) * plotH;
+    ctx2.beginPath(); ctx2.moveTo(padL, y); ctx2.lineTo(W - padR, y); ctx2.stroke();
+  }
+  // Y-axis labels
+  ctx2.fillStyle = 'rgba(148,163,184,0.6)';
+  ctx2.font = '9px JetBrains Mono';
+  ctx2.textAlign = 'right';
+  for (let g = 0; g <= 4; g++) {
+    const y = padT + (g/4) * plotH;
+    const lv = lHi - (g/4) * lRange;
+    const v = isLog ? (Math.exp(lv) - shift) : lv;
+    ctx2.fillText(v.toFixed(Math.abs(v) >= 100 ? 0 : 2), padL - 4, y + 3);
+  }
+  // X-axis tick: 0 and max
+  ctx2.textAlign = 'left';
+  ctx2.fillText('0', padL, H - 8);
+  ctx2.textAlign = 'right';
+  ctx2.fillText(String(maxLen - 1), W - padR, H - 8);
+
+  // Lines
+  for (const d of data) {
+    if (d.h.length < 2) continue;
+    ctx2.strokeStyle = ALGOS[d.a].colorHex;
+    ctx2.lineWidth = 1.8;
+    ctx2.shadowColor = ALGOS[d.a].colorHex;
+    ctx2.shadowBlur = 4;
+    ctx2.beginPath();
+    for (let i = 0; i < d.h.length; i++) {
+      const x = xMap(i), y = yMap(d.h[i]);
+      if (i === 0) ctx2.moveTo(x, y);
+      else ctx2.lineTo(x, y);
+    }
+    ctx2.stroke();
+    ctx2.shadowBlur = 0;
+  }
+}
 
 // 2D tooltip
 const tip = document.getElementById('tooltip');
@@ -2169,12 +2554,14 @@ view2d.addEventListener('touchend', e => {
 // BOOT
 // ═══════════════════════════════════════════════════════════════
 rebuildSurface();
+applyView();       // sync visibility of surface/wire/marker/paths with toggle state
 applyLang(lang);   // applies stored/default lang, calls updateFnMeta + updateAlgoInfo + updateStats
 updateFnChip();
 resizeAll();
 buildOptimizers();
 updateStats();
 draw2D();
+drawConvChart();
 animate(0);
 </script>
 </body>
