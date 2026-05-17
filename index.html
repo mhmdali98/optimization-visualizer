@@ -388,6 +388,78 @@ body::after {
   height: 160px;
 }
 
+/* Author credit */
+.credit {
+  margin-top: 16px;
+  padding: 14px 16px;
+  background:
+    linear-gradient(135deg, rgba(34,227,220,0.07), rgba(192,132,252,0.07)),
+    var(--bg-glass);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border-soft);
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+}
+.credit::before {
+  content: '';
+  position: absolute;
+  top: -1px; left: -1px; right: -1px;
+  height: 2px;
+  background: var(--grad-brand);
+  opacity: 0.55;
+}
+.credit-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.credit-info { min-width: 0; }
+.credit-by {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.credit-name {
+  font-weight: 700;
+  font-size: 15px;
+  background: var(--grad-brand);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 0.2px;
+}
+.credit-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0));
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  text-decoration: none;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  transition: border-color 0.15s, background 0.15s, color 0.15s, transform 0.1s, box-shadow 0.15s;
+  flex-shrink: 0;
+}
+.credit-btn:hover {
+  background: linear-gradient(135deg, rgba(34,227,220,0.18), rgba(192,132,252,0.14));
+  border-color: rgba(34,227,220,0.45);
+  color: var(--text);
+  box-shadow: 0 0 0 1px rgba(34,227,220,0.25) inset, 0 6px 20px -8px rgba(34,227,220,0.45);
+}
+.credit-btn:active { transform: scale(0.96); }
+.credit-btn svg { width: 12px; height: 12px; flex-shrink: 0; }
+
 #view3d, #view2d {
   width: 100%;
   height: 100%;
@@ -1245,6 +1317,19 @@ button.primary.playing {
           اختر خوارزمية لقراءة شرحها التفاعلي هنا.
         </div>
       </div>
+
+      <div class="credit">
+        <div class="credit-row">
+          <div class="credit-info">
+            <div class="credit-by" data-i18n="creditBy">إنشاء</div>
+            <div class="credit-name">محمد علي</div>
+          </div>
+          <a href="https://mhmdali98.github.io/testp/" target="_blank" rel="noopener" class="credit-btn" data-i18n-title="portfolioTitle">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3h7v7"/><path d="M10 14L21 3"/><path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"/></svg>
+            <span data-i18n="portfolio">Portfolio</span>
+          </a>
+        </div>
+      </div>
     </aside>
 
   </div>
@@ -1269,6 +1354,7 @@ const TRANS = {
     play:'▶ تشغيل', pause:'⏸ إيقاف', stepBtn:'⏭ خطوة', reset:'↻ إعادة',
     statsSection:'النتائج الحالية', algoInfoSection:'شرح الخوارزمية النشطة',
     convTitle:'منحنى التقارب', noConvData:'سيظهر المنحنى بعد بدء التشغيل',
+    creditBy:'إنشاء', portfolio:'Portfolio', portfolioTitle:'افتح بورتفوليو محمد علي',
     idle:'جاهز', live:'يعمل', done:'انتهى', stopped:'متوقف',
     waiting:'في انتظار التشغيل', steps:'الخطوات', dist:'Δ', tabuList:'محظور',
     algoAllPill:'مقارنة الكل · All', algoRsName:'Random', algoHcName:'Hill C.',
@@ -1307,6 +1393,7 @@ const TRANS = {
     play:'▶ Run', pause:'⏸ Pause', stepBtn:'⏭ Step', reset:'↻ Reset',
     statsSection:'Current Results', algoInfoSection:'Algorithm Description',
     convTitle:'Convergence Curve', noConvData:'Curve appears after running',
+    creditBy:'Created by', portfolio:'Portfolio', portfolioTitle:"Open Mohammed Ali's portfolio",
     idle:'Ready', live:'Running', done:'Done', stopped:'Paused',
     waiting:'Waiting to run', steps:'Steps', dist:'Δ', tabuList:'Tabu',
     algoAllPill:'Compare All', algoRsName:'Random', algoHcName:'Hill C.',
@@ -1345,6 +1432,7 @@ const TRANS = {
     play:'▶ اجرا', pause:'⏸ توقف', stepBtn:'⏭ گام', reset:'↻ بازنشانی',
     statsSection:'نتایج جاری', algoInfoSection:'توضیح الگوریتم',
     convTitle:'منحنی همگرایی', noConvData:'منحنی پس از اجرا ظاهر می‌شود',
+    creditBy:'ساخته شده توسط', portfolio:'Portfolio', portfolioTitle:'پورتفولیوی محمد علی',
     idle:'آماده', live:'در حال اجرا', done:'تمام', stopped:'متوقف',
     waiting:'در انتظار اجرا', steps:'گام‌ها', dist:'Δ', tabuList:'ممنوع',
     algoAllPill:'مقایسه همه', algoRsName:'تصادفی', algoHcName:'تپه‌نوردی',
@@ -1395,6 +1483,11 @@ function applyLang(newLang) {
   document.querySelectorAll('[data-i18n-html]').forEach(el => {
     const key = el.dataset.i18nHtml;
     if (L[key] !== undefined) el.innerHTML = L[key];
+  });
+  // title (tooltip) attribute
+  document.querySelectorAll('[data-i18n-title]').forEach(el => {
+    const key = el.dataset.i18nTitle;
+    if (L[key] !== undefined) el.setAttribute('title', L[key]);
   });
 
   // function select options
