@@ -1207,6 +1207,197 @@ button.primary.playing {
   background: var(--border);
   margin: 14px 0;
 }
+
+/* ── GA Detail View ──────────────────────────────────────── */
+.viz-mode-bar {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  display: flex;
+  gap: 2px;
+  background: rgba(7,9,15,0.82);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--border-soft);
+  border-radius: 10px;
+  padding: 4px;
+}
+.viz-mode-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 13px;
+  border-radius: 7px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-mid);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  min-height: unset;
+  transition: all 0.15s;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+.viz-mode-btn svg { width: 12px; height: 12px; flex-shrink: 0; }
+.viz-mode-btn:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+.viz-mode-btn.active {
+  background: rgba(34,227,220,0.12);
+  color: var(--rs);
+  border-color: rgba(34,227,220,0.3);
+  box-shadow: 0 0 10px -3px rgba(34,227,220,0.4);
+}
+.viz-mode-btn[data-mode="ga-detail"].active {
+  background: rgba(244,63,94,0.15);
+  color: var(--ga);
+  border-color: rgba(244,63,94,0.35);
+  box-shadow: 0 0 10px -3px rgba(244,63,94,0.45);
+}
+.ga-view {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-deep);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(6px);
+  transition: opacity 0.25s, transform 0.25s;
+  z-index: 5;
+}
+.viz.ga-mode .ga-view { opacity: 1; pointer-events: auto; transform: translateY(0); }
+.viz.ga-mode .view-wrap { opacity: 0; pointer-events: none; }
+.ga-pipeline {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 48px 16px 8px;
+  flex-shrink: 0;
+}
+.ga-stage-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 7px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--border-soft);
+  background: rgba(255,255,255,0.02);
+  cursor: pointer;
+  min-height: unset;
+  min-width: 60px;
+  transition: all 0.2s;
+  color: var(--text-dim);
+}
+.ga-stage-btn svg { width: 16px; height: 16px; }
+.ga-stage-btn .ga-stage-lbl {
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+}
+.ga-stage-btn:hover { background: rgba(255,255,255,0.04); color: var(--text-mid); }
+.ga-stage-btn.active {
+  border-color: var(--ga);
+  background: rgba(244,63,94,0.12);
+  color: var(--ga);
+  box-shadow: 0 0 14px -5px rgba(244,63,94,0.55);
+}
+.ga-stage-btn.done { border-color: rgba(34,227,220,0.3); color: var(--rs); background: rgba(34,227,220,0.05); }
+.ga-arrow { color: var(--text-dim); font-size: 14px; opacity: 0.4; flex-shrink: 0; user-select: none; }
+.ga-canvas-area { flex: 1; position: relative; overflow: hidden; min-height: 0; }
+#gaCanvas { width: 100%; height: 100%; display: block; }
+.ga-info-overlay {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(7,9,15,0.88);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--border-soft);
+  border-radius: 12px;
+  padding: 10px 18px;
+  max-width: 460px;
+  width: max-content;
+  text-align: center;
+  pointer-events: none;
+  z-index: 6;
+  box-shadow: 0 8px 24px -8px rgba(0,0,0,0.7);
+}
+.ga-info-title {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--ga);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+  font-family: 'JetBrains Mono', monospace;
+}
+.ga-info-text { font-size: 11.5px; color: var(--text-mid); line-height: 1.55; }
+.ga-controls-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  border-top: 1px solid var(--border-soft);
+  flex-shrink: 0;
+  gap: 8px;
+}
+.ga-stat-pills { display: flex; gap: 6px; }
+.ga-pill {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border-soft);
+  border-radius: 8px;
+  padding: 4px 10px;
+}
+.ga-pill-lbl { font-size: 8.5px; color: var(--text-dim); font-family:'JetBrains Mono',monospace; font-weight:700; letter-spacing:0.7px; text-transform:uppercase; }
+.ga-pill-val { font-size: 12px; color: var(--text); font-family:'JetBrains Mono',monospace; font-weight:700; margin-inline-start: 2px; }
+.ga-btn-group { display: flex; gap: 5px; }
+.ga-btn {
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 11.5px;
+  font-weight: 600;
+  border: 1px solid var(--border-soft);
+  background: rgba(255,255,255,0.04);
+  color: var(--text-mid);
+  cursor: pointer;
+  min-height: unset;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.ga-btn:hover { background: rgba(255,255,255,0.08); color: var(--text); }
+.ga-btn.ga-primary { background: rgba(244,63,94,0.18); border-color: rgba(244,63,94,0.4); color: var(--ga); }
+.ga-btn.ga-primary:hover { background: rgba(244,63,94,0.28); box-shadow: 0 0 14px -4px rgba(244,63,94,0.5); }
+@media (max-width: 1100px) and (min-width: 721px) {
+  .ga-pipeline { padding: 46px 10px 6px; gap: 2px; }
+  .ga-stage-btn { min-width: 52px; padding: 6px 8px; }
+  .ga-info-overlay { max-width: 80%; }
+}
+@media (max-width: 720px) {
+  .viz-mode-bar { top: 6px; padding: 3px; }
+  .viz-mode-btn { padding: 4px 9px; font-size: 10px; }
+  .viz-mode-btn svg { width: 11px; height: 11px; }
+  .ga-pipeline { padding: 42px 6px 5px; gap: 1px; }
+  .ga-stage-btn { min-width: 44px; padding: 5px 5px; }
+  .ga-stage-btn svg { width: 13px; height: 13px; }
+  .ga-stage-btn .ga-stage-lbl { font-size: 7px; }
+  .ga-arrow { font-size: 10px; }
+  .ga-controls-row { padding: 6px 10px; }
+  .ga-pill { padding: 3px 7px; }
+  .ga-pill-val { font-size: 11px; }
+  .ga-btn { padding: 5px 10px; font-size: 11px; }
+  .ga-info-overlay { max-width: calc(100% - 16px); bottom: 8px; padding: 7px 12px; }
+  .ga-info-title { font-size: 9px; }
+  .ga-info-text { font-size: 10px; }
+  .viz.ga-mode .view-wrap { display: none !important; }
+}
 </style>
 </head>
 <body data-tab="3d">
@@ -1350,7 +1541,20 @@ button.primary.playing {
     </aside>
 
     <!-- ============ CENTER: VISUALIZATIONS ============ -->
-    <section class="viz">
+    <section class="viz" id="vizSection">
+
+      <!-- View mode switcher -->
+      <div class="viz-mode-bar">
+        <button class="viz-mode-btn active" data-mode="main">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8" rx="1.2"/><rect x="13" y="3" width="8" height="8" rx="1.2"/><rect x="3" y="13" width="8" height="8" rx="1.2"/><rect x="13" y="13" width="8" height="8" rx="1.2"/></svg>
+          <span data-i18n="vizModeMain">Main</span>
+        </button>
+        <button class="viz-mode-btn" data-mode="ga-detail">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 15c6.667-6 13.333 0 20-6"/><path d="M9 22c1.798-3.6 2.202-5.4 4-9"/><path d="M15 2c-1.798 3.6-2.202 5.4-4 9"/><path d="m2 9 3 1-3 1"/><path d="m20 15 3 1-3 1"/></svg>
+          <span data-i18n="vizModeGA">GA Steps</span>
+        </button>
+      </div>
+
       <div class="view-wrap">
         <div class="view-label">3D Landscape</div>
         <div class="view-controls" id="view3dControls">
@@ -1410,6 +1614,63 @@ button.primary.playing {
         <canvas id="view2d"></canvas>
         <div class="tooltip" id="tooltip"></div>
       </div>
+
+      <!-- GA Detail View -->
+      <div class="ga-view" id="gaView">
+        <div class="ga-pipeline" id="gaPipeline">
+          <button class="ga-stage-btn active" data-stage="0">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="4" cy="6" r="1.8"/><circle cx="12" cy="4" r="1.8"/><circle cx="20" cy="8" r="1.8"/><circle cx="7" cy="15" r="1.8"/><circle cx="16" cy="12" r="1.8"/><circle cx="4" cy="20" r="1.8"/><circle cx="20" cy="19" r="1.8"/></svg>
+            <span class="ga-stage-lbl" data-i18n="gaStageInit">Init</span>
+          </button>
+          <span class="ga-arrow">›</span>
+          <button class="ga-stage-btn" data-stage="1">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+            <span class="ga-stage-lbl" data-i18n="gaStageEval">Eval</span>
+          </button>
+          <span class="ga-arrow">›</span>
+          <button class="ga-stage-btn" data-stage="2">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg>
+            <span class="ga-stage-lbl" data-i18n="gaStageSelect">Select</span>
+          </button>
+          <span class="ga-arrow">›</span>
+          <button class="ga-stage-btn" data-stage="3">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+            <span class="ga-stage-lbl" data-i18n="gaStageCross">Cross</span>
+          </button>
+          <span class="ga-arrow">›</span>
+          <button class="ga-stage-btn" data-stage="4">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+            <span class="ga-stage-lbl" data-i18n="gaStageMutate">Mutate</span>
+          </button>
+          <span class="ga-arrow">›</span>
+          <button class="ga-stage-btn" data-stage="5">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2.1l4 4-4 4"/><path d="M3 12.2v-2a4 4 0 0 1 4-4h12.8"/><path d="M7 21.9l-4-4 4-4"/><path d="M21 11.8v2a4 4 0 0 1-4 4H4.2"/></svg>
+            <span class="ga-stage-lbl" data-i18n="gaStageReplace">Replace</span>
+          </button>
+        </div>
+
+        <div class="ga-canvas-area">
+          <canvas id="gaCanvas"></canvas>
+          <div class="ga-info-overlay" id="gaInfoOverlay">
+            <div class="ga-info-title" id="gaInfoTitle"></div>
+            <div class="ga-info-text" id="gaInfoText"></div>
+          </div>
+        </div>
+
+        <div class="ga-controls-row">
+          <div class="ga-stat-pills">
+            <div class="ga-pill"><span class="ga-pill-lbl">Gen</span><span class="ga-pill-val" id="gaPillGen">0</span></div>
+            <div class="ga-pill"><span class="ga-pill-lbl">Best</span><span class="ga-pill-val" id="gaPillBest">—</span></div>
+            <div class="ga-pill"><span class="ga-pill-lbl">Pop</span><span class="ga-pill-val" id="gaPillPop">0</span></div>
+          </div>
+          <div class="ga-btn-group">
+            <button id="gaPlayBtn" class="ga-btn ga-primary" data-i18n="gaPlay">▶ Play</button>
+            <button id="gaNextBtn" class="ga-btn" data-i18n="gaNext">⏭ Next</button>
+            <button id="gaResetBtn" class="ga-btn" data-i18n="gaReset">↻ Reset</button>
+          </div>
+        </div>
+      </div>
+
     </section>
 
     <!-- ============ RIGHT: STATS ============ -->
@@ -1507,6 +1768,18 @@ const TRANS = {
     algoAllPill:'مقارنة الكل · All', algoRsName:'Random', algoHcName:'Hill C.',
     algoSaName:'Sim. Ann.', algoTabuName:'Tabu', algoGaName:'جيني',
     globalMin:'الحد الأدنى العالمي',
+    vizModeMain:'رئيسي', vizModeGA:'خطوات الجيني',
+    gaStageInit:'تهيئة', gaStageEval:'تقييم', gaStageSelect:'انتخاب',
+    gaStageCross:'تزاوج', gaStageMutate:'طفرة', gaStageReplace:'إحلال',
+    gaPlay:'▶ تشغيل', gaPause:'⏸ إيقاف', gaNext:'⏭ التالي', gaReset:'↻ إعادة',
+    gaStageInfo:[
+      {title:'التهيئة — Initialization', text:'نولّد 20 فرداً عشوائياً منتشرين في فضاء البحث. كلٌّ منهم نقطة (x,y) مرشّحة للحل الأمثل.'},
+      {title:'التقييم — Fitness Evaluation', text:'نحسب قيمة الدالة f(x,y) لكل فرد ونلوّنه. الأخضر = تكيّف أفضل · الأحمر = تكيّف أسوأ.'},
+      {title:'الانتخاب — Tournament Selection', text:'نختار 3 أفراد عشوائيين ونبقي الأفضل كوليّ. نكرر للحصول على والدَين P1 وP2.'},
+      {title:'التزاوج — BLX-α Crossover', text:'نمزج مواضع الوالدَين بمعامل α=0.3، فينشأ ابن جديد بين حدودهما الموسّعة.'},
+      {title:'الطفرة — Gaussian Mutation', text:'باحتمال 30٪ نضيف ضوضاء غاوسية لموضع الابن، مما يساعد على استكشاف مناطق جديدة.'},
+      {title:'الإحلال — Elitist Replacement', text:'أفضل فردَين من الجيل القديم (النخبة) ينجوان دائماً. يُستبدل الباقون بالأبناء الجدد من الجيل التالي.'},
+    ],
     algoInfoDefault:'اختر خوارزمية لقراءة شرحها التفاعلي هنا.',
     algoAllDesc:`<strong>وضع المقارنة</strong><br>الخمس تعمل بالتوازي. راقب:<br>
       • <span style="color:var(--rs)">Random</span> يرشّ النقاط بلا نظام<br>
@@ -1550,6 +1823,18 @@ const TRANS = {
     algoAllPill:'Compare All', algoRsName:'Random', algoHcName:'Hill C.',
     algoSaName:'Sim. Ann.', algoTabuName:'Tabu', algoGaName:'Genetic',
     globalMin:'Global Minimum',
+    vizModeMain:'Main', vizModeGA:'GA Steps',
+    gaStageInit:'Init', gaStageEval:'Eval', gaStageSelect:'Select',
+    gaStageCross:'Cross', gaStageMutate:'Mutate', gaStageReplace:'Replace',
+    gaPlay:'▶ Play', gaPause:'⏸ Pause', gaNext:'⏭ Next', gaReset:'↻ Reset',
+    gaStageInfo:[
+      {title:'Initialization', text:'20 random individuals are scattered across the search space. Each is a candidate solution (x, y) on the objective function.'},
+      {title:'Fitness Evaluation', text:'f(x,y) is computed for each individual and mapped to color. Green = better fitness (lower value) · Red = worse.'},
+      {title:'Tournament Selection', text:'Pick 3 random candidates, keep the best. Repeat to get parents P1 and P2 for reproduction.'},
+      {title:'BLX-α Crossover', text:'Blend parent positions with α=0.3 to produce a child within their extended bounding box. Explores the region between parents.'},
+      {title:'Gaussian Mutation', text:'With 30% probability, add Gaussian noise σ=step×0.5 to the child\'s position. Introduces diversity and avoids local optima.'},
+      {title:'Elitist Replacement', text:'The top 2 individuals (elites) from the old generation always survive. The rest are replaced by the new children.'},
+    ],
     algoInfoDefault:'Select an algorithm to read its description here.',
     algoAllDesc:`<strong>Comparison Mode</strong><br>All five run in parallel. Watch:<br>
       • <span style="color:var(--rs)">Random</span> scatters points with no memory<br>
@@ -1593,6 +1878,18 @@ const TRANS = {
     algoAllPill:'مقایسه همه', algoRsName:'تصادفی', algoHcName:'تپه‌نوردی',
     algoSaName:'بازپخت', algoTabuName:'ممنوع', algoGaName:'ژنتیک',
     globalMin:'کمینه جهانی',
+    vizModeMain:'اصلی', vizModeGA:'مراحل ژنتیک',
+    gaStageInit:'شروع', gaStageEval:'ارزیابی', gaStageSelect:'انتخاب',
+    gaStageCross:'تلاقی', gaStageMutate:'جهش', gaStageReplace:'جایگزینی',
+    gaPlay:'▶ اجرا', gaPause:'⏸ توقف', gaNext:'⏭ بعدی', gaReset:'↻ بازنشانی',
+    gaStageInfo:[
+      {title:'مقداردهی اولیه', text:'۲۰ فرد تصادفی در فضای جستجو پراکنده می‌شوند. هر فرد یک نقطه نامزد (x,y) روی تابع هدف است.'},
+      {title:'ارزیابی شایستگی', text:'مقدار f(x,y) برای هر فرد محاسبه و به رنگ نگاشته می‌شود. سبز = بهتر (مقدار کمتر) · قرمز = بدتر.'},
+      {title:'انتخاب تورنمنتی', text:'۳ فرد تصادفی انتخاب شده، بهترین نگه داشته می‌شود. برای والدین P1 و P2 تکرار می‌شود.'},
+      {title:'تلاقی BLX-α', text:'موقعیت والدین با α=0.3 ترکیب می‌شود تا فرزندی در محدوده موسّع آن‌ها ایجاد گردد.'},
+      {title:'جهش گاوسی', text:'با احتمال ۳۰٪ نویز گاوسی σ=گام×۰.۵ به موقعیت فرزند اضافه می‌شود تا تنوع افزایش یابد.'},
+      {title:'جایگزینی نخبه‌گرایانه', text:'۲ فرد برتر نسل قدیم (نخبگان) همیشه باقی می‌مانند. بقیه با فرزندان نسل جدید جایگزین می‌شوند.'},
+    ],
     algoInfoDefault:'یک الگوریتم را انتخاب کنید تا توضیح آن را بخوانید.',
     algoAllDesc:`<strong>حالت مقایسه</strong><br>هر پنج به‌صورت موازی اجرا می‌شوند:<br>
       • <span style="color:var(--rs)">تصادفی</span> نقاط را بی‌نظم پخش می‌کند<br>
@@ -1664,6 +1961,7 @@ function applyLang(newLang) {
   updateAlgoInfo();
   updateStats();
   updateFnMeta();
+  if (typeof gaUpdateUI === 'function') gaUpdateUI();
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -2621,6 +2919,7 @@ document.getElementById('funcSelect').addEventListener('change', e => {
   updateFnMeta();
   updateFnChip();
   reset();
+  if (gaViz) gaViz.hmFn = null; // invalidate GA heatmap cache
 });
 
 document.querySelectorAll('input[name=algo]').forEach(r => {
@@ -2961,6 +3260,573 @@ view2d.addEventListener('touchend', e => {
   setStartFromPoint(t.clientX, t.clientY);
   setTimeout(() => tip.style.display = 'none', 800);
 });
+
+// ═══════════════════════════════════════════════════════════════
+// GA DETAIL VIEW
+// ═══════════════════════════════════════════════════════════════
+const gaCanvas = document.getElementById('gaCanvas');
+const gaCtx = gaCanvas.getContext('2d');
+const GA_POP = 20;
+
+const gaViz = {
+  stage: 0,       // 0=init 1=eval 2=select 3=cross 4=mutate 5=replace
+  gen: 0,
+  population: [], // [{x,y,z,rank,appear}]
+  newPop: [],     // full new generation computed at replace stage
+  parents: null,  // {a, b} chosen for crossover display
+  tourney: [],    // [{group:[...], winner}] for display
+  child: null,    // crossover child
+  mutChild: null, // mutated child
+  elites: [],     // top-2 from old pop
+  animT: 0,       // 0→1 within current stage
+  pauseT: 0,      // countdown pause between stages (seconds)
+  playing: false,
+  rafId: null,
+  lastTs: 0,
+  hmFn: null,     // function key last used for heatmap
+  hmCanvas: null, // offscreen heatmap canvas
+};
+
+function gaW2C(x, y) {
+  const fn = FUNCS[state.func];
+  const b = fn.bounds;
+  const W = gaCanvas.width, H = gaCanvas.height;
+  return [
+    ((x - b[0]) / (b[1] - b[0])) * W,
+    H - ((y - b[2]) / (b[3] - b[2])) * H
+  ];
+}
+
+function gaEnsureHeatmap() {
+  if (gaViz.hmFn === state.func && gaViz.hmCanvas) return;
+  const fn = FUNCS[state.func];
+  const N = 150;
+  const b = fn.bounds;
+  const zs = new Float32Array(N*N);
+  let mi = Infinity, ma = -Infinity;
+  for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
+    const x = b[0] + (i/(N-1))*(b[1]-b[0]);
+    const y = b[2] + (j/(N-1))*(b[3]-b[2]);
+    const z = fn.f(x, y);
+    zs[j*N+i] = z;
+    if (z < mi) mi = z; if (z > ma) ma = z;
+  }
+  const off = document.createElement('canvas');
+  off.width = N; off.height = N;
+  const oct = off.getContext('2d');
+  const img = oct.createImageData(N, N);
+  const rng = ma - mi || 1;
+  for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
+    const t = (zs[j*N+i] - mi) / rng;
+    let r, g, bv;
+    if (t < 0.5) { const k=t*2; r=lerp(10,6,k); g=lerp(26,212,k); bv=lerp(42,205,k); }
+    else          { const k=(t-.5)*2; r=lerp(6,251,k); g=lerp(212,191,k); bv=lerp(205,36,k); }
+    const idx = ((N-1-j)*N+i)*4;
+    img.data[idx]=r; img.data[idx+1]=g; img.data[idx+2]=bv; img.data[idx+3]=255;
+  }
+  oct.putImageData(img, 0, 0);
+  gaViz.hmCanvas = off;
+  gaViz.hmFn = state.func;
+}
+
+function gaFitnessRgb(rank, total) {
+  const t = rank / Math.max(total-1, 1);
+  return [Math.round(lerp(34,244,t)), Math.round(lerp(220,63,t)), Math.round(lerp(80,94,t))];
+}
+
+function gaRankPop() {
+  const sorted = [...gaViz.population].sort((a,b) => a.z - b.z);
+  const rankMap = new Map(sorted.map((ind,i) => [ind, i]));
+  gaViz.population.forEach(ind => { ind.rank = rankMap.get(ind) ?? 0; });
+}
+
+function gaInitPop() {
+  const fn = FUNCS[state.func];
+  const b = fn.bounds;
+  gaViz.population = [];
+  const positions = [];
+  for (let i = 0; i < GA_POP; i++) {
+    const x = b[0] + Math.random()*(b[1]-b[0]);
+    const y = b[2] + Math.random()*(b[3]-b[2]);
+    positions.push({x, y, z: fn.f(x,y), rank: i, appear: i / (GA_POP - 1)});
+  }
+  // Shuffle appear timings for more natural scatter
+  const shuffled = [...positions].sort(() => Math.random() - 0.5);
+  shuffled.forEach((p, i) => { p.appear = i / (GA_POP - 1); });
+  gaViz.population = positions;
+  gaViz.newPop = [];
+  gaViz.parents = null;
+  gaViz.child = null;
+  gaViz.mutChild = null;
+  gaViz.elites = [];
+  gaViz.tourney = [];
+}
+
+function gaBestInd() {
+  return gaViz.population.reduce((a,b) => b.z < a.z ? b : a, gaViz.population[0]);
+}
+
+function gaBuildTournament() {
+  const pop = gaViz.population;
+  const k = 3;
+  const pick = () => {
+    const group = [];
+    let winner = null;
+    for (let i = 0; i < k; i++) {
+      const c = pop[Math.floor(Math.random()*pop.length)];
+      group.push(c);
+      if (!winner || c.z < winner.z) winner = c;
+    }
+    return {group, winner};
+  };
+  gaViz.tourney = [pick(), pick()];
+  gaViz.parents = {a: gaViz.tourney[0].winner, b: gaViz.tourney[1].winner};
+}
+
+function gaDoCrossover() {
+  const {a, b: pb} = gaViz.parents;
+  const fn = FUNCS[state.func];
+  const bnd = fn.bounds;
+  const alpha = 0.3;
+  const dx = Math.abs(a.x - pb.x) * alpha, dy = Math.abs(a.y - pb.y) * alpha;
+  const nx = clamp(randBetween(Math.min(a.x,pb.x)-dx, Math.max(a.x,pb.x)+dx), bnd[0], bnd[1]);
+  const ny = clamp(randBetween(Math.min(a.y,pb.y)-dy, Math.max(a.y,pb.y)+dy), bnd[2], bnd[3]);
+  gaViz.child = {x:nx, y:ny, z:fn.f(nx,ny), rank: Math.floor(GA_POP/2)};
+}
+
+function gaDoMutate() {
+  const fn = FUNCS[state.func];
+  const bnd = fn.bounds;
+  const sigma = state.step * 0.5;
+  const c = gaViz.child;
+  const nx = Math.random() < 0.3 ? clamp(c.x + randn()*sigma, bnd[0], bnd[1]) : c.x;
+  const ny = Math.random() < 0.3 ? clamp(c.y + randn()*sigma, bnd[2], bnd[3]) : c.y;
+  gaViz.mutChild = {x:nx, y:ny, z:fn.f(nx,ny), rank: c.rank, fromX:c.x, fromY:c.y};
+}
+
+function gaRunFullGeneration() {
+  const fn = FUNCS[state.func];
+  const bnd = fn.bounds;
+  const sigma = state.step * 0.5;
+  const pop = gaViz.population;
+  const tournament = k => {
+    let best = null;
+    for (let i = 0; i < k; i++) {
+      const c = pop[Math.floor(Math.random()*pop.length)];
+      if (!best || c.z < best.z) best = c;
+    }
+    return best;
+  };
+  const sorted = [...pop].sort((a,b) => a.z - b.z);
+  gaViz.elites = [sorted[0], sorted[1]];
+  const newPop = [{...sorted[0]}, {...sorted[1]}];
+  while (newPop.length < pop.length) {
+    const a = tournament(3), pb = tournament(3);
+    const alpha = 0.3;
+    const dx = Math.abs(a.x-pb.x)*alpha, dy = Math.abs(a.y-pb.y)*alpha;
+    let nx = clamp(randBetween(Math.min(a.x,pb.x)-dx, Math.max(a.x,pb.x)+dx), bnd[0], bnd[1]);
+    let ny = clamp(randBetween(Math.min(a.y,pb.y)-dy, Math.max(a.y,pb.y)+dy), bnd[2], bnd[3]);
+    if (Math.random()<0.3) nx = clamp(nx+randn()*sigma, bnd[0], bnd[1]);
+    if (Math.random()<0.3) ny = clamp(ny+randn()*sigma, bnd[2], bnd[3]);
+    newPop.push({x:nx, y:ny, z:fn.f(nx,ny)});
+  }
+  gaViz.newPop = newPop;
+}
+
+function gaAdvance() {
+  const s = gaViz.stage;
+  if (s === 0) {
+    gaRankPop();
+    gaViz.stage = 1;
+  } else if (s === 1) {
+    gaBuildTournament();
+    gaViz.stage = 2;
+  } else if (s === 2) {
+    gaDoCrossover();
+    gaViz.stage = 3;
+  } else if (s === 3) {
+    gaDoMutate();
+    gaViz.stage = 4;
+  } else if (s === 4) {
+    gaRunFullGeneration();
+    gaViz.stage = 5;
+  } else if (s === 5) {
+    gaViz.gen++;
+    gaViz.population = gaViz.newPop.map(ind => ({...ind}));
+    gaViz.newPop = [];
+    gaRankPop();
+    // Reset rank-based appear timings
+    gaViz.population.forEach((ind, i) => { ind.appear = 0; });
+    gaViz.parents = null; gaViz.child = null; gaViz.mutChild = null;
+    gaBuildTournament();
+    gaViz.stage = 2; // skip re-init, go to select of new gen
+  }
+  gaViz.animT = 0;
+  gaUpdateUI();
+}
+
+function easeOut3(t) { return 1-(1-t)*(1-t)*(1-t); }
+
+function drawGACanvas() {
+  const W = gaCanvas.width, H = gaCanvas.height;
+  if (W === 0 || H === 0) return;
+  gaEnsureHeatmap();
+  const ctx = gaCtx;
+  ctx.clearRect(0, 0, W, H);
+  const T = gaViz.animT;
+  const stage = gaViz.stage;
+  const pop = gaViz.population;
+  const DOT_R = Math.max(4, Math.min(7, W / 70));
+
+  // Heatmap background
+  if (gaViz.hmCanvas) {
+    ctx.globalAlpha = 0.6;
+    ctx.drawImage(gaViz.hmCanvas, 0, 0, W, H);
+    ctx.globalAlpha = 1;
+  }
+
+  const dotColor = ind => {
+    const [r,g,bv] = gaFitnessRgb(ind.rank, pop.length);
+    return `rgb(${r},${g},${bv})`;
+  };
+
+  // ── Stage 0: Init ──
+  if (stage === 0) {
+    pop.forEach(ind => {
+      if (T < ind.appear) return;
+      const lt = Math.min(1, (T - ind.appear) / 0.12);
+      const scale = lt < 0.6 ? lerp(0, 1.4, lt/0.6) : lerp(1.4, 1, (lt-0.6)/0.4);
+      const [cx, cy] = gaW2C(ind.x, ind.y);
+      ctx.save();
+      ctx.globalAlpha = lt;
+      ctx.shadowColor = '#22e3dc'; ctx.shadowBlur = 10 * (1-lt);
+      ctx.fillStyle = 'rgba(100,210,220,0.9)';
+      ctx.beginPath(); ctx.arc(cx, cy, DOT_R*scale, 0, 2*Math.PI); ctx.fill();
+      ctx.restore();
+    });
+    return;
+  }
+
+  // ── Stage 1: Eval ──
+  if (stage === 1) {
+    const scanY = easeOut3(T) * H;
+    pop.forEach(ind => {
+      const [cx, cy] = gaW2C(ind.x, ind.y);
+      const colored = cy <= scanY;
+      const [r,g,bv] = colored ? gaFitnessRgb(ind.rank, pop.length) : [110,150,170];
+      ctx.save();
+      ctx.fillStyle = `rgb(${r},${g},${bv})`;
+      if (colored) { ctx.shadowColor = `rgb(${r},${g},${bv})`; ctx.shadowBlur = 7; }
+      ctx.beginPath(); ctx.arc(cx, cy, DOT_R, 0, 2*Math.PI); ctx.fill();
+      ctx.restore();
+    });
+    if (T < 0.97) {
+      ctx.save();
+      const grad = ctx.createLinearGradient(0, scanY-8, 0, scanY+8);
+      grad.addColorStop(0, 'rgba(255,255,255,0)');
+      grad.addColorStop(0.5, 'rgba(255,255,255,0.5)');
+      grad.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, scanY-8, W, 16);
+      ctx.restore();
+    }
+    return;
+  }
+
+  // Helper: draw all pop dots (dimmed or not)
+  const drawAllPop = (alpha) => {
+    pop.forEach(ind => {
+      const [cx,cy] = gaW2C(ind.x, ind.y);
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = dotColor(ind);
+      ctx.beginPath(); ctx.arc(cx, cy, DOT_R, 0, 2*Math.PI); ctx.fill();
+      ctx.restore();
+    });
+  };
+
+  // ── Stage 2: Select ──
+  if (stage === 2) {
+    drawAllPop(0.35);
+    const tColors = ['#38bdf8', '#f59e0b'];
+    gaViz.tourney.forEach((tourney, ti) => {
+      const tc = tColors[ti];
+      const anim = Math.min(1, Math.max(0, T*2.2 - ti*0.6));
+      if (anim <= 0) return;
+      const [wx,wy] = gaW2C(tourney.winner.x, tourney.winner.y);
+      tourney.group.forEach(ind => {
+        const [cx,cy] = gaW2C(ind.x, ind.y);
+        ctx.save();
+        ctx.globalAlpha = anim * 0.55;
+        ctx.strokeStyle = tc; ctx.lineWidth = 1; ctx.setLineDash([3,4]);
+        ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(wx,wy); ctx.stroke();
+        ctx.restore();
+        ctx.save();
+        ctx.globalAlpha = anim * 0.85;
+        ctx.fillStyle = tc;
+        ctx.beginPath(); ctx.arc(cx,cy, DOT_R*0.85, 0, 2*Math.PI); ctx.fill();
+        ctx.restore();
+      });
+      ctx.save();
+      ctx.globalAlpha = anim;
+      ctx.shadowColor = tc; ctx.shadowBlur = 18;
+      ctx.strokeStyle = tc; ctx.lineWidth = 2.5;
+      ctx.beginPath(); ctx.arc(wx,wy, DOT_R+5, 0, 2*Math.PI); ctx.stroke();
+      ctx.fillStyle = tc;
+      ctx.beginPath(); ctx.arc(wx,wy, DOT_R*1.3, 0, 2*Math.PI); ctx.fill();
+      ctx.restore();
+    });
+    if (T > 0.55 && gaViz.parents) {
+      const la = Math.min(1, (T-0.55)*4);
+      [[gaViz.parents.a,'P1','#38bdf8'],[gaViz.parents.b,'P2','#f59e0b']].forEach(([p,lbl,c]) => {
+        const [px,py] = gaW2C(p.x, p.y);
+        ctx.save(); ctx.globalAlpha=la; ctx.fillStyle=c;
+        ctx.font=`bold ${Math.max(9,DOT_R*1.5)}px 'JetBrains Mono',monospace`;
+        ctx.textAlign='center'; ctx.shadowColor=c; ctx.shadowBlur=6;
+        ctx.fillText(lbl, px, py - DOT_R - 6); ctx.restore();
+      });
+    }
+    return;
+  }
+
+  // ── Stage 3: Crossover ──
+  if (stage === 3) {
+    drawAllPop(0.2);
+    if (!gaViz.parents || !gaViz.child) return;
+    const {a, b:pb} = gaViz.parents;
+    const [ax,ay] = gaW2C(a.x,a.y), [bx,by] = gaW2C(pb.x,pb.y);
+    const [chx,chy] = gaW2C(gaViz.child.x, gaViz.child.y);
+    [[ax,ay,'#38bdf8','P1'],[bx,by,'#f59e0b','P2']].forEach(([px,py,c,lbl]) => {
+      ctx.save(); ctx.shadowColor=c; ctx.shadowBlur=16;
+      ctx.fillStyle=c; ctx.beginPath(); ctx.arc(px,py,DOT_R*1.4,0,2*Math.PI); ctx.fill();
+      ctx.globalAlpha=0.7; ctx.fillStyle='#fff';
+      ctx.font=`bold 9px 'JetBrains Mono',monospace`; ctx.textAlign='center';
+      ctx.fillText(lbl, px, py-DOT_R-5); ctx.restore();
+    });
+    const lineT = Math.min(1, T*2.5);
+    ctx.save(); ctx.globalAlpha=lineT*0.6;
+    ctx.strokeStyle='rgba(255,255,255,0.7)'; ctx.lineWidth=1.5; ctx.setLineDash([5,5]);
+    ctx.beginPath(); ctx.moveTo(ax,ay);
+    ctx.lineTo(lerp(ax,bx,lineT), lerp(ay,by,lineT)); ctx.stroke(); ctx.restore();
+    if (T > 0.4) {
+      const ct = easeOut3(Math.min(1,(T-0.4)*2.5));
+      const [cr,cg,cb] = gaFitnessRgb(Math.floor(GA_POP/2), GA_POP);
+      ctx.save(); ctx.globalAlpha=ct; ctx.shadowColor=`rgb(${cr},${cg},${cb})`; ctx.shadowBlur=18;
+      ctx.fillStyle=`rgb(${cr},${cg},${cb})`;
+      ctx.beginPath(); ctx.arc(chx,chy, DOT_R*(0.3+ct*1.1), 0, 2*Math.PI); ctx.fill();
+      ctx.globalAlpha=ct*0.75; ctx.fillStyle='#fff';
+      ctx.font=`bold 9px 'JetBrains Mono',monospace`; ctx.textAlign='center';
+      ctx.fillText('CHILD', chx, chy-DOT_R*1.6-4); ctx.restore();
+    }
+    return;
+  }
+
+  // ── Stage 4: Mutate ──
+  if (stage === 4) {
+    drawAllPop(0.18);
+    if (!gaViz.mutChild) return;
+    const pre = gaViz.child, post = gaViz.mutChild;
+    const [prex,prey] = gaW2C(pre.x,pre.y);
+    const [postx,posty] = gaW2C(post.x,post.y);
+    const moved = Math.abs(pre.x-post.x)>0.001 || Math.abs(pre.y-post.y)>0.001;
+    if (moved) {
+      const trailT = Math.min(1, T*2.2);
+      ctx.save(); ctx.globalAlpha=0.45*(1-T);
+      ctx.strokeStyle='rgba(244,63,94,0.8)'; ctx.lineWidth=1.5; ctx.setLineDash([4,4]);
+      ctx.beginPath(); ctx.moveTo(prex,prey); ctx.lineTo(lerp(prex,postx,trailT),lerp(prey,posty,trailT)); ctx.stroke(); ctx.restore();
+      ctx.save(); ctx.globalAlpha=0.35*(1-T); ctx.fillStyle='rgba(140,140,160,0.9)';
+      ctx.beginPath(); ctx.arc(prex,prey,DOT_R,0,2*Math.PI); ctx.fill(); ctx.restore();
+      const posT = easeOut3(Math.min(1,T*2.2));
+      const dx=lerp(prex,postx,posT), dy=lerp(prey,posty,posT);
+      ctx.save(); ctx.shadowColor='#f43f5e'; ctx.shadowBlur=20;
+      ctx.fillStyle='#f43f5e'; ctx.beginPath(); ctx.arc(dx,dy,DOT_R*1.3,0,2*Math.PI); ctx.fill(); ctx.restore();
+      const sp = Math.min(1, T*2.8);
+      for (let s=0; s<8; s++) {
+        const angle = (s/8)*Math.PI*2 + T*4;
+        const dist = DOT_R*3.5*sp*(1-sp*0.6);
+        ctx.save(); ctx.globalAlpha=(1-sp)*0.85; ctx.fillStyle='#f43f5e';
+        ctx.beginPath(); ctx.arc(postx+Math.cos(angle)*dist, posty+Math.sin(angle)*dist, 1.8,0,2*Math.PI); ctx.fill(); ctx.restore();
+      }
+    } else {
+      ctx.save(); ctx.globalAlpha=0.85; ctx.fillStyle='rgba(150,160,180,0.9)';
+      ctx.beginPath(); ctx.arc(prex,prey,DOT_R*1.2,0,2*Math.PI); ctx.fill(); ctx.restore();
+    }
+    ctx.save(); ctx.globalAlpha=Math.min(1,T*3);
+    ctx.fillStyle = moved ? '#f43f5e' : '#6b7280';
+    ctx.shadowColor = moved ? '#f43f5e' : 'transparent'; ctx.shadowBlur = moved ? 6 : 0;
+    ctx.font=`bold 9px 'JetBrains Mono',monospace`; ctx.textAlign='center';
+    ctx.fillText(moved?'MUTATED':'NO CHANGE', postx, posty-DOT_R*1.8-4); ctx.restore();
+    return;
+  }
+
+  // ── Stage 5: Replace ──
+  if (stage === 5) {
+    const fadeOut = Math.max(0, 1-T*2.2);
+    const fadeIn  = Math.max(0, easeOut3(Math.max(0, T*2-0.6)));
+    pop.forEach(ind => {
+      const [cx,cy] = gaW2C(ind.x,ind.y);
+      const [r,g,bv] = gaFitnessRgb(ind.rank, pop.length);
+      const isElite = gaViz.elites.includes(ind);
+      ctx.save();
+      ctx.globalAlpha = isElite ? Math.max(0.05, fadeOut) : fadeOut*0.45;
+      if (isElite && fadeOut > 0.3) { ctx.shadowColor='#fbbf24'; ctx.shadowBlur=14*fadeOut; ctx.fillStyle='#fbbf24'; }
+      else { ctx.fillStyle=`rgb(${r},${g},${bv})`; }
+      ctx.beginPath(); ctx.arc(cx,cy, isElite?DOT_R*1.4:DOT_R, 0,2*Math.PI); ctx.fill();
+      ctx.restore();
+    });
+    if (fadeIn > 0 && gaViz.newPop.length) {
+      const sorted = [...gaViz.newPop].sort((a,b)=>a.z-b.z);
+      sorted.forEach((ind,i) => {
+        const [cx,cy] = gaW2C(ind.x,ind.y);
+        const [r,g,bv] = gaFitnessRgb(i, sorted.length);
+        const isE = i < 2;
+        ctx.save(); ctx.globalAlpha = fadeIn*(isE?1:0.88);
+        if (isE) { ctx.shadowColor='#fbbf24'; ctx.shadowBlur=12*fadeIn; }
+        ctx.fillStyle = `rgb(${r},${g},${bv})`;
+        ctx.beginPath(); ctx.arc(cx,cy, isE?DOT_R*1.4:DOT_R, 0,2*Math.PI); ctx.fill();
+        ctx.restore();
+      });
+    }
+    return;
+  }
+}
+
+function gaUpdateUI() {
+  document.querySelectorAll('.ga-stage-btn').forEach((btn,i) => {
+    btn.classList.toggle('active', i === gaViz.stage);
+    btn.classList.toggle('done',   i < gaViz.stage);
+  });
+  document.getElementById('gaPillGen').textContent = gaViz.gen;
+  const best = gaViz.population.length > 0 ? gaBestInd() : null;
+  document.getElementById('gaPillBest').textContent = best ? best.z.toFixed(3) : '—';
+  document.getElementById('gaPillPop').textContent  = gaViz.population.length;
+  const infos = t('gaStageInfo');
+  if (Array.isArray(infos) && infos[gaViz.stage]) {
+    document.getElementById('gaInfoTitle').textContent = infos[gaViz.stage].title;
+    document.getElementById('gaInfoText').textContent  = infos[gaViz.stage].text;
+  }
+  const pb = document.getElementById('gaPlayBtn');
+  if (pb) pb.textContent = gaViz.playing ? t('gaPause') : t('gaPlay');
+}
+
+function gaResizeCanvas() {
+  const area = gaCanvas.parentElement;
+  if (!area) return;
+  const W = area.clientWidth, H = area.clientHeight;
+  if (W > 0 && H > 0 && (gaCanvas.width !== W || gaCanvas.height !== H)) {
+    gaCanvas.width = W; gaCanvas.height = H;
+    gaViz.hmFn = null;
+  }
+}
+
+function gaAnimLoop(ts) {
+  if (!gaViz.playing) return;
+  const dt = gaViz.lastTs > 0 ? Math.min(0.05, (ts - gaViz.lastTs) / 1000) : 0.016;
+  gaViz.lastTs = ts;
+  if (gaViz.pauseT > 0) {
+    gaViz.pauseT -= dt;
+    gaViz.rafId = requestAnimationFrame(gaAnimLoop);
+    return;
+  }
+  gaViz.animT = Math.min(1, gaViz.animT + dt * 0.75);
+  gaResizeCanvas();
+  drawGACanvas();
+  if (gaViz.animT >= 1) {
+    gaViz.pauseT = 0.45;
+    gaAdvance();
+  }
+  gaViz.rafId = requestAnimationFrame(gaAnimLoop);
+}
+
+function gaStopPlay() {
+  gaViz.playing = false;
+  gaViz.lastTs = 0;
+  if (gaViz.rafId) { cancelAnimationFrame(gaViz.rafId); gaViz.rafId = null; }
+  gaUpdateUI();
+}
+
+function gaStartPlay() {
+  gaViz.playing = true;
+  gaViz.lastTs = 0;
+  gaViz.rafId = requestAnimationFrame(gaAnimLoop);
+  gaUpdateUI();
+}
+
+function gaTogglePlay() {
+  if (gaViz.playing) gaStopPlay(); else gaStartPlay();
+}
+
+function gaReset() {
+  gaStopPlay();
+  gaViz.stage = 0; gaViz.gen = 0;
+  gaViz.newPop = []; gaViz.parents = null; gaViz.child = null;
+  gaViz.mutChild = null; gaViz.elites = []; gaViz.animT = 0;
+  gaViz.hmFn = null;
+  gaInitPop();
+  gaUpdateUI();
+  gaResizeCanvas();
+  drawGACanvas();
+}
+
+function setVizMode(mode) {
+  const section = document.getElementById('vizSection');
+  if (!section) return;
+  document.querySelectorAll('.viz-mode-btn').forEach(btn =>
+    btn.classList.toggle('active', btn.dataset.mode === mode)
+  );
+  if (mode === 'ga-detail') {
+    section.classList.add('ga-mode');
+    gaResizeCanvas();
+    if (gaViz.population.length === 0) gaReset();
+    else { gaUpdateUI(); drawGACanvas(); }
+  } else {
+    section.classList.remove('ga-mode');
+    gaStopPlay();
+  }
+}
+
+// Viz mode buttons
+document.querySelectorAll('.viz-mode-btn').forEach(btn =>
+  btn.addEventListener('click', () => setVizMode(btn.dataset.mode))
+);
+
+// Stage pipeline buttons (click to jump to that stage)
+document.querySelectorAll('.ga-stage-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    gaStopPlay();
+    const stg = parseInt(btn.dataset.stage);
+    if (stg === 0) { gaInitPop(); gaViz.stage = 0; }
+    else {
+      if (gaViz.population.length === 0) gaInitPop();
+      gaRankPop();
+      if (stg >= 1) { /* Eval: already ranked */ gaViz.stage = 1; }
+      if (stg >= 2) { gaBuildTournament(); gaViz.stage = 2; }
+      if (stg >= 3) { gaDoCrossover(); gaViz.stage = 3; }
+      if (stg >= 4) { gaDoMutate(); gaViz.stage = 4; }
+      if (stg >= 5) { gaRunFullGeneration(); gaViz.stage = 5; }
+    }
+    gaViz.animT = 1;
+    gaUpdateUI();
+    drawGACanvas();
+  });
+});
+
+document.getElementById('gaPlayBtn')?.addEventListener('click', gaTogglePlay);
+document.getElementById('gaNextBtn')?.addEventListener('click', () => {
+  gaStopPlay();
+  gaViz.animT = 1;
+  gaAdvance();
+  gaResizeCanvas();
+  drawGACanvas();
+});
+document.getElementById('gaResetBtn')?.addEventListener('click', gaReset);
+
+new ResizeObserver(() => {
+  if (document.getElementById('vizSection')?.classList.contains('ga-mode')) {
+    gaResizeCanvas();
+    drawGACanvas();
+  }
+}).observe(gaCanvas.parentElement);
 
 // ═══════════════════════════════════════════════════════════════
 // BOOT
